@@ -32,3 +32,8 @@ class DataRepository:
         sql = "UPDATE lampen SET status = %s"
         params = [status]
         return Database.execute_sql(sql, params)
+
+    @staticmethod
+    def random_activiteit():
+        sql = "SELECT activiteit FROM Activiteiten ORDER BY RAND() LIMIT 1"
+        return Database.get_rows(sql)
