@@ -60,24 +60,22 @@ def initial_connection():
 # START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
 # werk enkel met de packages gevent en gevent-websocket.
 def temperatuur():
-    while True:
-        sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
+    sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
 
-        sensor_file = open(sensor_file_name, 'r')
-        for line in sensor_file:
-            lijn = line.rstrip("\n")
-            t = lijn.find("t=")
+    sensor_file = open(sensor_file_name, 'r')
+    for line in sensor_file:
+        lijn = line.rstrip("\n")
+        t = lijn.find("t=")
 
-        if(t != -1):
-            temp = int(lijn.split("t=")[1])
-            print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
+    if(t != -1):
+        temp = int(lijn.split("t=")[1])
+        print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
 
 
 def data_versturen():
     while True:
         print("temperatuur versturen")
-        teVersturen = temperatuur()
-        socketio.emit('B2F_status_temp', {'data': teVersturen}, broadcast=True)
+        socketio.emit('B2F_status_temp', {'data': temperatuur()}, broadcast=True)
         time.sleep(1)
 
 
