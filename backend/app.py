@@ -70,12 +70,14 @@ def temperatuur():
     if(t != -1):
         temp = int(lijn.split("t=")[1])
         print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
+        return temp/1000
 
 
 def data_versturen():
     while True:
         print("temperatuur versturen")
-        socketio.emit('B2F_status_temp', {'data': temperatuur()}, broadcast=True)
+        socketio.emit('B2F_status_temp', {
+                      'data': temperatuur()}, broadcast=True)
         time.sleep(1)
 
 
