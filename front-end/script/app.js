@@ -10,7 +10,7 @@ const listenToSocket = function () {
 
   socket.on('B2F_status_temp', function (jsonObject) {
         console.log(jsonObject)
-        // document.querySelector('.js-temperatuur').innerHTML = `Temperatuur: ${jsonObject.data} &deg; C `
+        document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.data} &deg; C `
     })
   
 
