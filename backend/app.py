@@ -5,7 +5,7 @@ import threading
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from repositories.DataRepository import DataRepository
 
 from selenium import webdriver
@@ -13,7 +13,7 @@ from selenium import webdriver
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
 
-
+endpoint = '/api/v1'
 # Code voor Hardware
 
 
@@ -43,19 +43,22 @@ def error_handler(e):
 def hallo():
     return "Server is running, er zijn momenteel geen API endpoints beschikbaar."
 
-@app.route('192.168.168.169/activiteit')
+
+@app.route(endpoint + '/activiteiten/', methods=['GET'])
+def get_activiteit():
+    if request.method == 'GET':
+
+        return jsonify(activiteit=DataRepository.random_activiteit()), 200
 
 
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
 
-@socketio.on()
 
-
+# @socketio.on()
 # START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
 # werk enkel met de packages gevent en gevent-websocket.
-
 def temperatuur():
     while True:
         sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
