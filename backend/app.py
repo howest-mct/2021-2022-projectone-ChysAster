@@ -70,7 +70,7 @@ def temperatuur():
     if(t != -1):
         temp = int(lijn.split("t=")[1])
         print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
-        return temp/1000
+        return round(temp/1000, 2)
 
 
 def data_versturen():
