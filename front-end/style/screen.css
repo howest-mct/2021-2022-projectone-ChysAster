@@ -6,11 +6,11 @@
   height: 660px;
   margin: 0 auto;
   justify-content: center;
-  background-color: black;
+  background-color: blue;
 }
 
 .cell {
-  border: 5px solid black;
+  border: 5px solid blue;
   background-color: white;
   border-radius: 50%;
 }
