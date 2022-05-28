@@ -35,5 +35,5 @@ class DataRepository:
 
     @staticmethod
     def random_activiteit():
-        sql = "SELECT activiteit FROM Activiteiten ORDER BY RAND() LIMIT 1"
+        sql = "SELECT Activiteit FROM Activiteiten ORDER BY RAND() LIMIT 1"
         return Database.get_rows(sql)
