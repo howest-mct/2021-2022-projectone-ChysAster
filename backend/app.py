@@ -93,7 +93,7 @@ if __name__ == '__main__':
         setup_gpio()
         print("**** Starting APP ****")
         start_thread()
-        socketio.run(app, debug=False, host='0.0.0.0')
+        socketio.run(app, debug=True, host='0.0.0.0')
     except KeyboardInterrupt:
         print('KeyboardInterrupt exception is caught')
     finally:
