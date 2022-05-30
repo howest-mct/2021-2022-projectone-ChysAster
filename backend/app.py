@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request
 from repositories.DataRepository import DataRepository
 from subprocess import check_output
 from selenium import webdriver
+from pylcdlib import lcd4bit
 
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
@@ -15,7 +16,12 @@ from selenium import webdriver
 ips = check_output(['hostname', '--all-ip-addresses'])
 zonderB = str(ips)[18:32]
 print(zonderB)
+<<<<<<< HEAD
+mylcd = lcd4bit()
+mylcd.write_message(zonderB)
+=======
 
+>>>>>>> 36237585087b19669795713ab4e9e923b0cc9d5b
 
 endpoint = '/api/v1'
 # Code voor Hardware
@@ -105,7 +111,12 @@ if __name__ == '__main__':
         print("**** Starting APP ****")
         start_thread()
         socketio.run(app, debug=False, host='0.0.0.0')
+<<<<<<< HEAD
+
+=======
+>>>>>>> 36237585087b19669795713ab4e9e923b0cc9d5b
     except KeyboardInterrupt:
         print('KeyboardInterrupt exception is caught')
     finally:
         GPIO.cleanup()
+        mylcd.clear_lcd()
