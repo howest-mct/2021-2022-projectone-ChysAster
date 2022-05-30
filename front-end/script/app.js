@@ -1,130 +1,68 @@
+'use strict'
 const lanIP = `${window.location.hostname}:5000`;
+console.log(lanIP)
 const socket = io(`http://${lanIP}`);
 
-// $(document).ready(function(){
-//     var player = 1;
-//     var winner = 0;
-//     var colors = {};
-//     colors[-1] = "yellow";
-//     colors[1] = "red";
-//     var count = 0;
+//#region ***  DOM references                           ***********
+let htmlHistoriek;
+//#endregion
 
-//     $(".cell").each(function(){
-//         $(this).attr("id", count);
-//         $(this).attr("data-player", 0);
-//         count++;
-//         $(this).click(function(){
-//             if(isValid($(this).attr("id"))){
-//                 $(this).css("background-color", colors[player]);
-//                 $(this).attr("data-player", player);
-//                 if(checkWin(player)){
-//                     alert(colors[player] + " has won!");
-//                     winner = player;
-//                 }
-//                 player *= -1;
-//             }
-//         });
-//     });
+//#region ***  Callback-Visualisation - show___         ***********
+const showHistoriek = function (jsonObject) {
+  console.log(jsonObject)
+  let htmlString = '';
+  for (const historiek of jsonObject.historiek) {
+    htmlString += `<table>
+          <tr>
+            <th>id</th>
+            <th>Device</th>
+            <th>Tijdstip</th>
+            <th>Waarde</th>
+          </tr>
+          <tr class="js-historiek">
+            <td>${historiek.idHistoriek}</td>
+            <td>${historiek.naam}</td>
+            <td>${historiek.tijdstip}</td>
+            <td>${historiek.waarde}</td>
+          </tr>
+        </table>`
+  }
 
-//     function isValid(n){
-//         var id = parseInt(n);
-//         if(winner !== 0){
-//             return false;
-//         }
-//         if($("#" + id).attr("data-player") === "0"){
-//             if(id >= 35){
-//                 return true;
-//             }
-//             if($("#" + (id + 7)).attr("data-player") !== "0"){
-//                 return true;
-//             }
-//         }
-//         return false;
-//     }
+  htmlHistoriek.innerHTML = htmlString;
+  
+}
+//#endregion
 
-//     function checkWin(p){
-//         //check rows
-//         var chain = 0; 
-//         for(var i = 0; i < 42; i+=7){
-//             for(var j = 0; j < 7; j++){
-//                 var cell = $("#" + (i+j));
-//                 if(cell.attr("data-player") == p){
-//                     chain++;
-//                 }else{
-//                     chain=0;
-//                 }
+//#region ***  Data Access - get___                     ***********
+const getHistoriek = function () {
+  handleData(`http://${lanIP}/api/v1/historiek/`, showHistoriek);
+}
 
-//                 if(chain >= 4){
-//                     return true;
-//                 }
-//             }
-//             chain = 0;
-//         }
+//#endregion
 
-//         //check columns
-//         chain = 0;
-//         for(var i = 0; i < 7; i++){
-//             for(var j = 0; j < 42; j+=7){
-//                 var cell = $("#" + (i + j));
-//                 if(cell.attr("data-player") == p){
-//                     chain++;
-//                 }else{
-//                     chain = 0;
-//                 }
-
-//                 if(chain >= 4){
-//                     return true;
-//                 }
-//             }
-//             chain = 0;
-//         }
-
-//         //check diagonals
-//         var topLeft = 0;
-//         var topRight = topLeft + 3;
-
-//         for(var i = 0; i <3; i++){
-//             for(var j = 0; j < 4; j++){
-//                 if($("#" + topLeft).attr("data-player") == p
-//                 && $("#" + (topLeft + 8)).attr("data-player") == p
-//                 && $("#" + (topLeft + 16)).attr("data-player") == p
-//                 && $("#" + (topLeft + 24)).attr("data-player") == p){
-//                     return true;
-//                 }
-
-//                 if($("#" + topRight).attr("data-player") == p
-//                 && $("#" + (topRight + 6)).attr("data-player") == p
-//                 && $("#" + (topRight + 12)).attr("data-player") == p
-//                 && $("#" + (topRight + 18)).attr("data-player") == p){
-//                     return true;
-//                 }
-
-//                 topLeft++;
-//                 topRight = topLeft + 3;
-//             }
-//             topLeft = i * 7 + 7;
-//             topRight = topLeft + 3;
-//         }
-        
-//         return false;
-//     }
-// });
-
+//#region ***  Event Listeners - listenTo___            ***********
 const listenToSocket = function () {
   socket.on("connected", function () {
     console.log("verbonden met socket webserver");
   });
 
   socket.on('B2F_status_temp', function (jsonObject) {
+        console.log("in socket")
         console.log(jsonObject)
-        document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.data} &deg; C `
+        document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.data} &deg; C`
     })
   
 
 };
+//#endregion
 
+//#region ***  Init / DOMContentLoaded                  ***********
 document.addEventListener("DOMContentLoaded", function () {
   console.info("DOM geladen");
+
+  htmlHistoriek = document.querySelector('.historiek')
   // listenToUI();
   listenToSocket();
+  getHistoriek();
 });
+//#endregion

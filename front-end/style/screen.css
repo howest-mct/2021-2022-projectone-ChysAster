@@ -1,20 +1,100 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(7, 110px);
-  grid-template-rows: repeat(6, 110px);
-  width: 770px;
-  height: 660px;
-  margin: 0 auto;
-  justify-content: center;
-  background-color: blue;
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.cell {
-  border: 5px solid blue;
+h1,
+h2 {
+  text-align: center;
+}
+
+/* grid */
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 0.2fr 0.2fr 2.6fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "titel titel titel"
+    ". winner temptitel"
+    ". board splitsing";
+}
+
+.titel {
+  grid-area: titel;
+}
+
+.winner {
+  grid-area: winner;
+}
+
+.temptitel {
+  grid-area: temptitel;
+}
+
+.board {
+  grid-area: board;
+}
+
+.splitsing {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 0.2fr 1.8fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "js-temperatuur js-temperatuur js-temperatuur"
+    "historiek historiek historiek"
+    ". . .";
+  grid-area: splitsing;
+}
+
+.js-temperatuur {
+  grid-area: js-temperatuur;
+}
+
+.historiek {
+  grid-area: historiek;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* grid einde */
+#board {
+  height: 540px;
+  width: 630px;
+  background-color: blue;
+  border: 10px solid navy;
+
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tile {
+  height: 70px;
+  width: 70px;
+  margin: 5px;
+
+  /* Circle */
   background-color: white;
   border-radius: 50%;
+  border: 5px solid navy;
 }
 
-.cell:hover {
-  background-color: rgb(75, 204, 255);
+.red-piece {
+  background-color: red;
+}
+
+.yellow-piece {
+  background-color: yellow;
+}
+
+.temp {
+  text-align: center;
+}
+
+.js-temperatuur {
+  text-align: center;
 }
