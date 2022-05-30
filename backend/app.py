@@ -1,17 +1,21 @@
 import time
 from RPi import GPIO
-from helpers.klasseknop import Button
 import threading
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify, request
 from repositories.DataRepository import DataRepository
-
+from subprocess import check_output
 from selenium import webdriver
 
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
+
+ips = check_output(['hostname', '--all-ip-addresses'])
+zonderB = str(ips)[18:32]
+print(zonderB)
+
 
 endpoint = '/api/v1'
 # Code voor Hardware
@@ -51,6 +55,12 @@ def get_activiteit():
         return jsonify(activiteit=DataRepository.random_activiteit()), 200
 
 
+@app.route(endpoint + '/historiek/', methods=['GET'])
+def get_historiek():
+    if request.method == 'GET':
+        return jsonify(historiek=DataRepository.get_historiek()), 200
+
+
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
@@ -69,7 +79,7 @@ def temperatuur():
 
     if(t != -1):
         temp = int(lijn.split("t=")[1])
-        print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
+        # print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
         return round(temp/1000, 2)
 
 
@@ -78,7 +88,8 @@ def data_versturen():
         print("temperatuur versturen")
         socketio.emit('B2F_status_temp', {
                       'data': temperatuur()}, broadcast=True)
-        time.sleep(1)
+        DataRepository.create_historiek(2, temperatuur())
+        time.sleep(15)
 
 
 def start_thread():
@@ -93,7 +104,7 @@ if __name__ == '__main__':
         setup_gpio()
         print("**** Starting APP ****")
         start_thread()
-        socketio.run(app, debug=True, host='0.0.0.0')
+        socketio.run(app, debug=False, host='0.0.0.0')
     except KeyboardInterrupt:
         print('KeyboardInterrupt exception is caught')
     finally:

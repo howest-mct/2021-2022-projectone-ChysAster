@@ -37,3 +37,14 @@ class DataRepository:
     def random_activiteit():
         sql = "SELECT Activiteit FROM Activiteiten ORDER BY RAND() LIMIT 1"
         return Database.get_rows(sql)
+
+    @staticmethod
+    def create_historiek(Device_idDevice, waarde):
+        sql = "INSERT INTO Historiek(Device_idDevice, waarde) VALUES (%s,%s)"
+        params = [Device_idDevice, waarde]
+        return Database.execute_sql(sql, params)
+
+    @staticmethod
+    def get_historiek():
+        sql = "select idHistoriek, naam, tijdstip, waarde from Historiek left join Device ON Historiek.Device_idDevice = Device.idDevice order by idHistoriek DESC limit 10"
+        return Database.get_rows(sql)
