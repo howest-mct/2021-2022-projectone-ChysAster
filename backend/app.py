@@ -16,7 +16,6 @@ from pylcdlib import lcd4bit
 ips = check_output(['hostname', '--all-ip-addresses'])
 zonderB = str(ips)[18:32]
 print(zonderB)
-
 mylcd = lcd4bit()
 mylcd.write_message(zonderB)
 
