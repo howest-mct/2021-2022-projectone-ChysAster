@@ -9,19 +9,25 @@ from repositories.DataRepository import DataRepository
 from subprocess import check_output
 from selenium import webdriver
 from pylcdlib import lcd4bit
+from serial import Serial, PARITY_NONE
 
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
 
 ips = check_output(['hostname', '--all-ip-addresses'])
 zonderB = str(ips)[18:32]
 print(zonderB)
-<<<<<<< HEAD
+
 mylcd = lcd4bit()
 mylcd.write_message(zonderB)
-=======
 
->>>>>>> 36237585087b19669795713ab4e9e923b0cc9d5b
+kleur = ''
+
+eersteKolom = 21
+tweedeKolom = 26
+derdeKolom = 20
+vierdeKolom = 16
+vijfdeKolom = 19
+zesdeKolom = 13
+zevendeKolom = 6
 
 endpoint = '/api/v1'
 # Code voor Hardware
@@ -30,6 +36,13 @@ endpoint = '/api/v1'
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
+    GPIO.setup(eersteKolom, GPIO.IN)
+    GPIO.setup(tweedeKolom, GPIO.IN)
+    GPIO.setup(derdeKolom, GPIO.IN)
+    GPIO.setup(vierdeKolom, GPIO.IN)
+    GPIO.setup(vijfdeKolom, GPIO.IN)
+    GPIO.setup(zesdeKolom, GPIO.IN)
+    GPIO.setup(zevendeKolom, GPIO.IN)
 
 
 # Code voor Flask
@@ -93,7 +106,7 @@ def data_versturen():
     while True:
         print("temperatuur versturen")
         socketio.emit('B2F_status_temp', {
-                      'data': temperatuur()}, broadcast=True)
+                      'temperatuur': temperatuur()}, broadcast=True)
         DataRepository.create_historiek(2, temperatuur())
         time.sleep(15)
 
@@ -104,17 +117,148 @@ def start_thread():
     thread.start()
 
 
-# ANDERE FUNCTIES
+def read_serial():
+    with Serial('/dev/ttyS0', 9600, bytesize=8, parity=PARITY_NONE, stopbits=1) as port:
+        while True:
+            if port.in_waiting > 0:
+                line = port.readline().decode('utf-8')  .rstrip()
+                print(line)
+                if line == "188":
+                    DataRepository.create_historiek(1, "geel")
+                    # socketio.emit('B2F_rfid_data_geel', "geel", broadcast=True)
+                    kleur = 'geel'
+                elif line == "129":
+                    DataRepository.create_historiek(1, "blauw")
+                    # socketio.emit('B2F_rfid_data_rood', "rood", broadcast=True)
+                    kleur = 'blauw'
+                socketio.emit('B2F_rfid_data', kleur, broadcast=True)
+
+                # niet returnen anders stopt de thread
+                # return line
+
+
+def thread_serial():
+    print("**** Starting THREAD serial ****")
+    thread = threading.Thread(target=read_serial, args=())
+    thread.start()
+
+# threads kolommen
+
+
+def eerste_kolom():
+    while True:
+        if(GPIO.input(eersteKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_eerste_kolom', "eerste_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_eerste_kolom():
+    print("infrarood eerste kolom thread")
+    thread = threading.Thread(target=eerste_kolom)
+    thread.start()
+
+
+def tweede_kolom():
+    while True:
+        if(GPIO.input(tweedeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_tweede_kolom', "tweede_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_tweede_kolom():
+    print("infrarood tweede kolom thread")
+    thread = threading.Thread(target=tweede_kolom)
+    thread.start()
+
+
+def derde_kolom():
+    while True:
+        if(GPIO.input(derdeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_derde_kolom', "derde_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_derde_kolom():
+    print("infrarood derde kolom thread")
+    thread = threading.Thread(target=derde_kolom)
+    thread.start()
+
+
+def vierde_kolom():
+    while True:
+        if(GPIO.input(vierdeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_vierde_kolom', "vierde_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_vierde_kolom():
+    print("infrarood vierde kolom thread")
+    thread = threading.Thread(target=vierde_kolom)
+    thread.start()
+
+
+def vijfde_kolom():
+    while True:
+        if(GPIO.input(vijfdeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_vijfde_kolom', "vijfde_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_vijfde_kolom():
+    print("infrarood vijfde kolom thread")
+    thread = threading.Thread(target=vijfde_kolom)
+    thread.start()
+
+
+def zesde_kolom():
+    while True:
+        if(GPIO.input(zesdeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_zesde_kolom', "zesde_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_zesde_kolom():
+    print("infrarood zesde kolom thread")
+    thread = threading.Thread(target=zesde_kolom)
+    thread.start()
+
+
+def zevende_kolom():
+    while True:
+        if(GPIO.input(zevendeKolom) == False):
+            print("versturen infrarood")
+            socketio.emit('B2F_zevende_kolom', "zevende_kolom verstuurd")
+            time.sleep(5)
+
+
+def thread_zevende_kolom():
+    print("infrarood zevende kolom thread")
+    thread = threading.Thread(target=zevende_kolom)
+    thread.start()
+
+
+    # ANDERE FUNCTIES
 if __name__ == '__main__':
     try:
         setup_gpio()
         print("**** Starting APP ****")
         start_thread()
+        thread_serial()
+        thread_eerste_kolom()
+        thread_tweede_kolom()
+        thread_derde_kolom()
+        thread_vierde_kolom()
+        thread_vijfde_kolom()
+        thread_zesde_kolom()
+        thread_zevende_kolom()
         socketio.run(app, debug=False, host='0.0.0.0')
-<<<<<<< HEAD
 
-=======
->>>>>>> 36237585087b19669795713ab4e9e923b0cc9d5b
     except KeyboardInterrupt:
         print('KeyboardInterrupt exception is caught')
     finally:
