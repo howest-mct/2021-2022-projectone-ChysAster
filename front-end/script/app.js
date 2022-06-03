@@ -4,7 +4,7 @@ console.log(lanIP)
 const socket = io(`http://${lanIP}`);
 
 //#region ***  DOM references                           ***********
-let htmlHistoriek;
+let htmlHistoriek, htmlIndex;
 //#endregion
 
 //#region ***  4 in a row references                           ***********
@@ -21,14 +21,14 @@ const showHistoriek = function (jsonObject) {
   console.log(jsonObject)
   let htmlString = '';
   for (const historiek of jsonObject.historiek) {
-    htmlString += `<table>
+    htmlString += `<table class="c-table">
+      <tr>
+        <th>id</th>
+        <th>Device</th>
+        <th>Tijdstip</th>
+        <th>Waarde</th>
+      </tr>
           <tr>
-            <th>id</th>
-            <th>Device</th>
-            <th>Tijdstip</th>
-            <th>Waarde</th>
-          </tr>
-          <tr class="js-historiek">
             <td>${historiek.idHistoriek}</td>
             <td>${historiek.naam}</td>
             <td>${historiek.tijdstip}</td>
@@ -100,19 +100,7 @@ const gescand = function () {
     })
 }
 
-
-
-const listenToSocket = function () {
-  socket.on("connected", function () {
-    console.log("verbonden met socket webserver");
-  });
-
-  socket.on('B2F_status_temp', function (jsonObject) {
-        console.log("in socket")
-        console.log(jsonObject)
-        document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.temperatuur} &deg; C`
-  })
-    
+const listenToSocketGame = function () {
     socket.on('B2F_eerste_kolom', function (jsonObject) {
         console.log(jsonObject)
         postitieEersteKolom()
@@ -155,11 +143,20 @@ const listenToSocket = function () {
         setPiece()
       
   })
-    
-   
-    
-  
+}
 
+const listenToSocketTemp = function () {
+    socket.on('B2F_status_temp', function (jsonObject) {
+        console.log("in socket")
+        console.log(jsonObject)
+        document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.temperatuur} &deg; C`
+  })
+}
+
+const listenToSocket = function () {
+  socket.on("connected", function () {
+    console.log("verbonden met socket webserver");
+  });
 };
 //#endregion
 
@@ -317,15 +314,26 @@ document.addEventListener("DOMContentLoaded", function () {
   console.info("DOM geladen");
 
     htmlHistoriek = document.querySelector('.historiek')
+    htmlIndex = document.querySelector('.html-index')
     
   // listenToUI();
-  setGame();
+    if (htmlIndex) {
+        setGame();
+        gescand()
+        listenToSocketGame()
+        listenToSocketTemp()
+    }   
+  
     listenToSocket(); 
     
-    getHistoriek();
+    if (htmlHistoriek) {
+        getHistoriek();
+        
+    }
     
     
-    gescand()
+    
+    
     
 });
 //#endregion
