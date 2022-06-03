@@ -103,3 +103,5 @@ h2 {
   margin-left: auto;
   margin-right: auto;
 }
+
+@media (min-width:414px) {}
