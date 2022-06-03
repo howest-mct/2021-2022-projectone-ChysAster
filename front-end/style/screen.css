@@ -64,8 +64,8 @@ h2 {
 #board {
   height: 540px;
   width: 630px;
-  background-color: blue;
-  border: 10px solid navy;
+  background-color: red;
+  border: 10px solid darkred;
 
   margin: 0 auto;
   display: flex;
@@ -80,11 +80,11 @@ h2 {
   /* Circle */
   background-color: white;
   border-radius: 50%;
-  border: 5px solid navy;
+  border: 5px solid darkred;
 }
 
-.red-piece {
-  background-color: red;
+.blue-piece {
+  background-color: blue;
 }
 
 .yellow-piece {

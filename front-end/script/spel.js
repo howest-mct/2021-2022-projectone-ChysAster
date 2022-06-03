@@ -1,5 +1,3 @@
-
-
 var playerRed = "R";
 var playerYellow = "Y";
 var currPlayer = playerRed;
@@ -19,30 +17,31 @@ function setGame() {
     board = [];
     currColumns = [5, 5, 5, 5, 5, 5, 5];
 
-    for (let r = 0; r < rows; r++) {
-        let row = [];
-        for (let c = 0; c < columns; c++) {
+    for (let r = 0; r < rows; r++) { //r voor rows
+        let row = []; //rij creeren
+        for (let c = 0; c < columns; c++) { //c voor collumns
             // JS
-            row.push(' ');
+            row.push(' '); //white space
             // HTML
-            let tile = document.createElement("div");
-            tile.id = r.toString() + "-" + c.toString();
-            tile.classList.add("tile");
-            tile.addEventListener("click", setPiece);
-            document.getElementById("board").append(tile);
+            //<div id="0-0" class="tile"></div>
+            let tile = document.createElement("div"); // 1 gokje van de 4 op een rij wordt div gemaakt
+            tile.id = r.toString() + "-" + c.toString(); //id = rijnummer-collnummer om te communiceren met js
+            tile.classList.add("tile"); //klasse tile voor later te stylen
+            tile.addEventListener("click", setPiece); //als er geklikt wordt stuk insteken
+            document.getElementById("board").append(tile); //we voegen de gemaakte div toe aan aan id board
         }
-        board.push(row);
+        board.push(row); //we voegen het toe aan ons js bord
     }
 }
 
 function setPiece() {
     if (gameOver) {
-        return;
+        return; //als er een winner is doe niets
     }
 
     //get coords of that tile clicked
-    let coords = this.id.split("-");
-    let r = parseInt(coords[0]);
+    let coords = this.id.split("-"); //van 0-0 naar ["0","0"] 
+    let r = parseInt(coords[0]); //hier halen we de rij en de kolom uit
     let c = parseInt(coords[1]);
 
     // figure out which row the current column should be on
