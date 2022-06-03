@@ -19,23 +19,25 @@ let c
 //#region ***  Callback-Visualisation - show___         ***********
 const showHistoriek = function (jsonObject) {
   console.log(jsonObject)
-  let htmlString = '';
-  for (const historiek of jsonObject.historiek) {
-    htmlString += `<table class="c-table">
+    let htmlString = `<table class="c-table">
       <tr>
         <th>id</th>
         <th>Device</th>
         <th>Tijdstip</th>
         <th>Waarde</th>
-      </tr>
+      </tr>`;
+   
+  for (const historiek of jsonObject.historiek) {
+    htmlString += `
           <tr>
             <td>${historiek.idHistoriek}</td>
             <td>${historiek.naam}</td>
             <td>${historiek.tijdstip}</td>
             <td>${historiek.waarde}</td>
           </tr>
-        </table>`
+        `
   }
+    htmlString+=`</table>`
 
   htmlHistoriek.innerHTML = htmlString;
   
