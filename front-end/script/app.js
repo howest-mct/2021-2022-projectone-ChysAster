@@ -8,6 +8,7 @@ let htmlHistoriek, htmlIndex, htmlOpdracht;
 //#endregion
 
 let huidige_opdracht = '';
+let aantal_minuten = 0;
 let counterBlauw = 0;
 let counterGeel = 0;
 
@@ -151,6 +152,8 @@ const listenToSocket = function () {
   socket.on('B2F_opdracht_geel', function (jsonObject) {
     huidige_opdracht = jsonObject.Activiteit;
     console.log(huidige_opdracht);
+    aantal_minuten = jsonObject.aantalMinuten;
+    socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
     if (counterGeel == 0) {
       let htmlString = huidige_opdracht;
       htmlOpdracht.innerHTML = htmlString;
@@ -160,10 +163,12 @@ const listenToSocket = function () {
   socket.on('B2F_opdracht_blauw', function (jsonObject) {
     huidige_opdracht = jsonObject.Activiteit;
     console.log(huidige_opdracht);
-    if (counterBlauw == 0) {
-      let htmlString = huidige_opdracht;
-      htmlOpdracht.innerHTML = htmlString;
-    }
+    aantal_minuten = jsonObject.aantalMinuten;
+    socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
+    // if (counterBlauw == 0) {
+    let htmlString = huidige_opdracht;
+    htmlOpdracht.innerHTML = htmlString;
+    // }
   });
 };
 //#endregion
@@ -176,18 +181,12 @@ let currPlayer = null; //= playerYellow
 
 const handle_gescand = function (json) {
   if (json == 'geel') {
-    console.log(`eerste ${counterGeel}`);
     counterGeel += 1;
-    console.log(`tweede ${counterGeel}`);
     if (counterGeel == 1) {
-      console.log(`derde ${counterGeel}`);
       console.log('Team geel opdracht uitvoeren');
     } else if (counterGeel == 2) {
-      console.log(`vierde ${counterGeel}`);
       currPlayer = playerYellow;
-      console.log(`vijfde ${counterGeel}`);
       counterGeel = 0;
-      console.log(`zesde ${counterGeel}`);
     }
   } else if (json == 'blauw') {
     // currPlayer = playerRed
@@ -196,7 +195,6 @@ const handle_gescand = function (json) {
       console.log('Team blauw opdracht uitvoeren');
     } else if (counterBlauw == 2) {
       currPlayer = playerBlue;
-      console.log(counterBlauw);
       counterBlauw = 0;
     }
   }

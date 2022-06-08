@@ -90,6 +90,26 @@ def initial_connection():
     print('A new client connect')
 
 
+@socketio.on('F2B_opdracht_geel_minuten')
+def opdracht_geel_timer(jsonObject):
+    if(jsonObject == 1):
+        mymatrix.aftellen_een_minuten
+    elif(jsonObject == 3):
+        mymatrix.aftellen_drie_minuten
+    elif(jsonObject == 5):
+        mymatrix.aftellen_vijf_minuten
+
+
+@socketio.on('F2B_opdracht_blauw_minuten')
+def opdracht_blauw_timer(jsonObject):
+    if(jsonObject == 1):
+        mymatrix.aftellen_een_minuten2
+    elif(jsonObject == 3):
+        mymatrix.aftellen_drie_minuten2
+    elif(jsonObject == 5):
+        mymatrix.aftellen_vijf_minuten2
+
+
 # @socketio.on()
 # START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
 # werk enkel met de packages gevent en gevent-websocket.
