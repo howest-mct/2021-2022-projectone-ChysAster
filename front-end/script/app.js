@@ -4,7 +4,7 @@ console.log(lanIP);
 const socket = io(`http://${lanIP}`);
 
 //#region ***  DOM references                           ***********
-let htmlHistoriek, htmlIndex;
+let htmlHistoriek, htmlIndex, htmlOpdracht;
 //#endregion
 
 let huidige_opdracht = '';
@@ -148,8 +148,20 @@ const listenToSocket = function () {
     console.log('verbonden met socket webserver');
   });
 
+  socket.on('B2F_opdracht_geel', function (jsonObject) {
+    huidige_opdracht = jsonObject.Activiteit;
+    if (counterGeel == 0) {
+      let htmlString = huidige_opdracht;
+      htmlOpdracht.innerHTML = htmlString;
+    }
+  });
+
   socket.on('B2F_opdracht_blauw', function (jsonObject) {
     huidige_opdracht = jsonObject.Activiteit;
+    if (counterGeel == 0) {
+      let htmlString = huidige_opdracht;
+      htmlOpdracht.innerHTML = htmlString;
+    }
   });
 };
 //#endregion
@@ -314,6 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   htmlHistoriek = document.querySelector('.historiek');
   htmlIndex = document.querySelector('.html-index');
+  htmlOpdracht = document.querySelector('.js-opdracht');
 
   // listenToUI();
   if (htmlIndex) {
