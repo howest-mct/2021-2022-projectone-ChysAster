@@ -11,7 +11,7 @@ from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
 from matrix import Matrix
-
+woord = 'minuten'
 mymatrix = Matrix()
 
 ips = check_output(['hostname', '--all-ip-addresses'])
@@ -136,7 +136,10 @@ def read_serial():
                         activiteit_geel = DataRepository.random_activiteit_water()
                     elif(temperatuur() < 24):
                         activiteit_geel = DataRepository.random_activiteit()
-                    socketio.emit('B2F_opdracht_geel', activiteit_geel, broadcast = True)
+                        if woord in activiteit_geel:
+                            print("woord is aanwezig")
+                    socketio.emit('B2F_opdracht_geel',
+                                  activiteit_geel, broadcast=True)
                 elif line == str(batchBlauw):
                     DataRepository.create_historiek(1, "blauw")
                     # socketio.emit('B2F_rfid_data_rood', "rood", broadcast=True)
@@ -257,6 +260,7 @@ def thread_zevende_kolom():
     print("infrarood zevende kolom thread")
     thread = threading.Thread(target=zevende_kolom)
     thread.start()
+
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':
