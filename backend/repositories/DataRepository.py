@@ -35,12 +35,12 @@ class DataRepository:
 
     @staticmethod
     def random_activiteit():
-        sql = "SELECT Activiteit FROM Activiteiten where isWater = 0 ORDER BY RAND() LIMIT 1"
+        sql = "SELECT Activiteit, aantalMinuten FROM Activiteiten where isWater = 0 ORDER BY RAND() LIMIT 1"
         return Database.get_one_row(sql)
 
     @staticmethod
     def random_activiteit_water():
-        sql = "SELECT Activiteit FROM Activiteiten WHERE isWater = 0 of isWater = 1 ORDER BY RAND() LIMI 1"
+        sql = "SELECT Activiteit, aantalMinuten FROM Activiteiten WHERE isWater = 0 of isWater = 1 ORDER BY RAND() LIMI 1"
         return Database.get_one_row(sql)
 
     @staticmethod
