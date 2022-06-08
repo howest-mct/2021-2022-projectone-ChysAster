@@ -10,11 +10,16 @@ from subprocess import check_output
 from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
+from matrix import Matrix
 
+mymatrix = Matrix()
 
 ips = check_output(['hostname', '--all-ip-addresses'])
 zonderB = str(ips)[18:32]
 print(zonderB)
+
+batchGeel = 188
+batchBlauw = 129
 
 mylcd = lcd4bit()
 mylcd.write_message(zonderB)
@@ -123,14 +128,25 @@ def read_serial():
             if port.in_waiting > 0:
                 line = port.readline().decode('utf-8')  .rstrip()
                 print(line)
-                if line == "188":
+                if line == str(batchGeel):
                     DataRepository.create_historiek(1, "geel")
                     # socketio.emit('B2F_rfid_data_geel', "geel", broadcast=True)
                     kleur = 'geel'
-                elif line == "129":
+                    if(temperatuur() > 24):
+                        activiteit_geel = DataRepository.random_activiteit_water()
+                    elif(temperatuur() < 24):
+                        activiteit_geel = DataRepository.random_activiteit()
+                    socketio.emit('B2F_opdracht_geel', activiteit_geel, broadcast = True)
+                elif line == str(batchBlauw):
                     DataRepository.create_historiek(1, "blauw")
                     # socketio.emit('B2F_rfid_data_rood', "rood", broadcast=True)
                     kleur = 'blauw'
+                    if(temperatuur() > 24):
+                        activiteit_blauw = DataRepository.random_activiteit_water()
+                    elif(temperatuur() < 24):
+                        activiteit_blauw = DataRepository.random_activiteit()
+                    socketio.emit('B2F_opdracht_blauw',
+                                  activiteit_blauw, broadcast=True)
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
                 # niet returnen anders stopt de thread
@@ -241,7 +257,6 @@ def thread_zevende_kolom():
     print("infrarood zevende kolom thread")
     thread = threading.Thread(target=zevende_kolom)
     thread.start()
-
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':

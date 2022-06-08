@@ -172,13 +172,13 @@ let currPlayer = null //= playerYellow
 
 const handle_gescand = function (json) {
     if (json == "geel") {
-    currPlayer = playerYellow
+        currPlayer = playerYellow
+        
 }
 else if(json == "blauw") {
     // currPlayer = playerRed
     currPlayer = playerBlue
 }
-    
 }
 
 
