@@ -11,7 +11,6 @@ from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
 from matrix import Matrix
-woord = 'minuten'
 mymatrix = Matrix()
 
 ips = check_output(['hostname', '--all-ip-addresses'])
@@ -90,6 +89,26 @@ def initial_connection():
     print('A new client connect')
 
 
+@socketio.on('F2B_opdracht_geel_minuten')
+def opdracht_geel_timer(jsonObject):
+    if(jsonObject == 1):
+        mymatrix.aftellen_een_minuten
+    elif(jsonObject == 3):
+        mymatrix.aftellen_drie_minuten
+    elif(jsonObject == 5):
+        mymatrix.aftellen_vijf_minuten
+
+
+@socketio.on('F2B_opdracht_blauw_minuten')
+def opdracht_blauw_timer(jsonObject):
+    if(jsonObject == 1):
+        mymatrix.aftellen_een_minuten2
+    elif(jsonObject == 3):
+        mymatrix.aftellen_drie_minuten2
+    elif(jsonObject == 5):
+        mymatrix.aftellen_vijf_minuten2
+
+
 # @socketio.on()
 # START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
 # werk enkel met de packages gevent en gevent-websocket.
@@ -136,8 +155,6 @@ def read_serial():
                         activiteit_geel = DataRepository.random_activiteit_water()
                     elif(temperatuur() < 24):
                         activiteit_geel = DataRepository.random_activiteit()
-                        if woord in activiteit_geel:
-                            print("woord is aanwezig")
                     socketio.emit('B2F_opdracht_geel',
                                   activiteit_geel, broadcast=True)
                 elif line == str(batchBlauw):
@@ -168,7 +185,7 @@ def eerste_kolom():
     while True:
         if(GPIO.input(eersteKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_eerste_kolom', "eerste_kolom verstuurd")
+            socketio.emit('B2F_eerste_kolom', 0)
             time.sleep(5)
 
 
@@ -182,7 +199,7 @@ def tweede_kolom():
     while True:
         if(GPIO.input(tweedeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_tweede_kolom', "tweede_kolom verstuurd")
+            socketio.emit('B2F_tweede_kolom', 1)
             time.sleep(5)
 
 
@@ -196,7 +213,7 @@ def derde_kolom():
     while True:
         if(GPIO.input(derdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_derde_kolom', "derde_kolom verstuurd")
+            socketio.emit('B2F_derde_kolom', 2)
             time.sleep(5)
 
 
@@ -210,7 +227,7 @@ def vierde_kolom():
     while True:
         if(GPIO.input(vierdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_vierde_kolom', "vierde_kolom verstuurd")
+            socketio.emit('B2F_vierde_kolom', 3)
             time.sleep(5)
 
 
@@ -224,7 +241,7 @@ def vijfde_kolom():
     while True:
         if(GPIO.input(vijfdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_vijfde_kolom', "vijfde_kolom verstuurd")
+            socketio.emit('B2F_vijfde_kolom', 4)
             time.sleep(5)
 
 
@@ -238,7 +255,7 @@ def zesde_kolom():
     while True:
         if(GPIO.input(zesdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_zesde_kolom', "zesde_kolom verstuurd")
+            socketio.emit('B2F_zesde_kolom', 5)
             time.sleep(5)
 
 
@@ -252,7 +269,7 @@ def zevende_kolom():
     while True:
         if(GPIO.input(zevendeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_zevende_kolom', "zevende_kolom verstuurd")
+            socketio.emit('B2F_zevende_kolom', 6)
             time.sleep(5)
 
 

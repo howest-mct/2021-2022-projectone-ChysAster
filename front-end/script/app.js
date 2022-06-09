@@ -8,6 +8,7 @@ let htmlHistoriek, htmlIndex, htmlOpdracht;
 //#endregion
 
 let huidige_opdracht = '';
+let aantal_minuten = 0;
 let counterBlauw = 0;
 let counterGeel = 0;
 
@@ -51,40 +52,40 @@ const getHistoriek = function () {
 //#endregion
 
 //#region ***  functions 4 in a row                     ***********
-const postitieEersteKolom = function () {
+const positieKolom = function (number) {
   r = 0;
-  c = 0;
+  c = number;
 };
 
-const positieTweedeKolom = function () {
-  r = 0;
-  c = 1;
-};
+// const positieTweedeKolom = function () {
+//   r = 0;
+//   c = 1;
+// };
 
-const positieDerdeKolom = function () {
-  r = 0;
-  c = 2;
-};
+// const positieDerdeKolom = function () {
+//   r = 0;
+//   c = 2;
+// };
 
-const positieVierdeKolom = function () {
-  r = 0;
-  c = 3;
-};
+// const positieVierdeKolom = function () {
+//   r = 0;
+//   c = 3;
+// };
 
-const positieVijfdeKolom = function () {
-  r = 0;
-  c = 4;
-};
+// const positieVijfdeKolom = function () {
+//   r = 0;
+//   c = 4;
+// };
 
-const positieZesdeKolom = function () {
-  r = 0;
-  c = 5;
-};
+// const positieZesdeKolom = function () {
+//   r = 0;
+//   c = 5;
+// };
 
-const positieZevendeKolom = function () {
-  r = 0;
-  c = 6;
-};
+// const positieZevendeKolom = function () {
+//   r = 0;
+//   c = 6;
+// };
 
 //#endregion
 
@@ -92,45 +93,45 @@ const positieZevendeKolom = function () {
 
 const gescand = function () {
   socket.on('B2F_rfid_data', function (jsonObject) {
-    console.log(jsonObject);
+    console.log(`Blok in ${jsonObject + 1} kolom`);
     handle_gescand(jsonObject);
   });
 };
 
 const listenToSocketGame = function () {
   socket.on('B2F_eerste_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    postitieEersteKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_tweede_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieTweedeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_derde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieDerdeKolom();
+    console.log(`Blok in ${jsonObject} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_vierde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieVierdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_vijfde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieVijfdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_zesde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieZesdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_zevende_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieZevendeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
 };
@@ -151,6 +152,8 @@ const listenToSocket = function () {
   socket.on('B2F_opdracht_geel', function (jsonObject) {
     huidige_opdracht = jsonObject.Activiteit;
     console.log(huidige_opdracht);
+    aantal_minuten = jsonObject.aantalMinuten;
+    socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
     if (counterGeel == 0) {
       let htmlString = huidige_opdracht;
       htmlOpdracht.innerHTML = htmlString;
@@ -160,10 +163,12 @@ const listenToSocket = function () {
   socket.on('B2F_opdracht_blauw', function (jsonObject) {
     huidige_opdracht = jsonObject.Activiteit;
     console.log(huidige_opdracht);
-    if (counterBlauw == 0) {
-      let htmlString = huidige_opdracht;
-      htmlOpdracht.innerHTML = htmlString;
-    }
+    aantal_minuten = jsonObject.aantalMinuten;
+    socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
+    // if (counterBlauw == 0) {
+    let htmlString = huidige_opdracht;
+    htmlOpdracht.innerHTML = htmlString;
+    // }
   });
 };
 //#endregion
@@ -176,18 +181,12 @@ let currPlayer = null; //= playerYellow
 
 const handle_gescand = function (json) {
   if (json == 'geel') {
-    console.log(`eerste ${counterGeel}`);
     counterGeel += 1;
-    console.log(`tweede ${counterGeel}`);
     if (counterGeel == 1) {
-      console.log(`derde ${counterGeel}`);
       console.log('Team geel opdracht uitvoeren');
     } else if (counterGeel == 2) {
-      console.log(`vierde ${counterGeel}`);
       currPlayer = playerYellow;
-      console.log(`vijfde ${counterGeel}`);
       counterGeel = 0;
-      console.log(`zesde ${counterGeel}`);
     }
   } else if (json == 'blauw') {
     // currPlayer = playerRed
@@ -196,7 +195,6 @@ const handle_gescand = function (json) {
       console.log('Team blauw opdracht uitvoeren');
     } else if (counterBlauw == 2) {
       currPlayer = playerBlue;
-      console.log(counterBlauw);
       counterBlauw = 0;
     }
   }
