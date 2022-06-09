@@ -11,7 +11,6 @@ from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
 from matrix import Matrix
-woord = 'minuten'
 mymatrix = Matrix()
 
 ips = check_output(['hostname', '--all-ip-addresses'])
@@ -156,8 +155,6 @@ def read_serial():
                         activiteit_geel = DataRepository.random_activiteit_water()
                     elif(temperatuur() < 24):
                         activiteit_geel = DataRepository.random_activiteit()
-                        if woord in activiteit_geel:
-                            print("woord is aanwezig")
                     socketio.emit('B2F_opdracht_geel',
                                   activiteit_geel, broadcast=True)
                 elif line == str(batchBlauw):
