@@ -52,40 +52,40 @@ const getHistoriek = function () {
 //#endregion
 
 //#region ***  functions 4 in a row                     ***********
-const postitieEersteKolom = function () {
+const positieKolom = function (number) {
   r = 0;
-  c = 0;
+  c = number;
 };
 
-const positieTweedeKolom = function () {
-  r = 0;
-  c = 1;
-};
+// const positieTweedeKolom = function () {
+//   r = 0;
+//   c = 1;
+// };
 
-const positieDerdeKolom = function () {
-  r = 0;
-  c = 2;
-};
+// const positieDerdeKolom = function () {
+//   r = 0;
+//   c = 2;
+// };
 
-const positieVierdeKolom = function () {
-  r = 0;
-  c = 3;
-};
+// const positieVierdeKolom = function () {
+//   r = 0;
+//   c = 3;
+// };
 
-const positieVijfdeKolom = function () {
-  r = 0;
-  c = 4;
-};
+// const positieVijfdeKolom = function () {
+//   r = 0;
+//   c = 4;
+// };
 
-const positieZesdeKolom = function () {
-  r = 0;
-  c = 5;
-};
+// const positieZesdeKolom = function () {
+//   r = 0;
+//   c = 5;
+// };
 
-const positieZevendeKolom = function () {
-  r = 0;
-  c = 6;
-};
+// const positieZevendeKolom = function () {
+//   r = 0;
+//   c = 6;
+// };
 
 //#endregion
 
@@ -93,45 +93,45 @@ const positieZevendeKolom = function () {
 
 const gescand = function () {
   socket.on('B2F_rfid_data', function (jsonObject) {
-    console.log(jsonObject);
+    console.log(`Blok in ${jsonObject + 1} kolom`);
     handle_gescand(jsonObject);
   });
 };
 
 const listenToSocketGame = function () {
   socket.on('B2F_eerste_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    postitieEersteKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_tweede_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieTweedeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_derde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieDerdeKolom();
+    console.log(`Blok in ${jsonObject} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_vierde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieVierdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_vijfde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieVijfdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_zesde_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieZesdeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
   socket.on('B2F_zevende_kolom', function (jsonObject) {
-    console.log(jsonObject);
-    positieZevendeKolom();
+    console.log(`Blok in ${jsonObject + 1} kolom`);
+    positieKolom(jsonObject);
     setPiece();
   });
 };

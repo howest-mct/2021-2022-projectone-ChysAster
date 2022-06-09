@@ -185,7 +185,7 @@ def eerste_kolom():
     while True:
         if(GPIO.input(eersteKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_eerste_kolom', "eerste_kolom verstuurd")
+            socketio.emit('B2F_eerste_kolom', 0)
             time.sleep(5)
 
 
@@ -199,7 +199,7 @@ def tweede_kolom():
     while True:
         if(GPIO.input(tweedeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_tweede_kolom', "tweede_kolom verstuurd")
+            socketio.emit('B2F_tweede_kolom', 1)
             time.sleep(5)
 
 
@@ -213,7 +213,7 @@ def derde_kolom():
     while True:
         if(GPIO.input(derdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_derde_kolom', "derde_kolom verstuurd")
+            socketio.emit('B2F_derde_kolom', 2)
             time.sleep(5)
 
 
@@ -227,7 +227,7 @@ def vierde_kolom():
     while True:
         if(GPIO.input(vierdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_vierde_kolom', "vierde_kolom verstuurd")
+            socketio.emit('B2F_vierde_kolom', 3)
             time.sleep(5)
 
 
@@ -241,7 +241,7 @@ def vijfde_kolom():
     while True:
         if(GPIO.input(vijfdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_vijfde_kolom', "vijfde_kolom verstuurd")
+            socketio.emit('B2F_vijfde_kolom', 4)
             time.sleep(5)
 
 
@@ -255,7 +255,7 @@ def zesde_kolom():
     while True:
         if(GPIO.input(zesdeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_zesde_kolom', "zesde_kolom verstuurd")
+            socketio.emit('B2F_zesde_kolom', 5)
             time.sleep(5)
 
 
@@ -269,7 +269,7 @@ def zevende_kolom():
     while True:
         if(GPIO.input(zevendeKolom) == False):
             print("versturen infrarood")
-            socketio.emit('B2F_zevende_kolom', "zevende_kolom verstuurd")
+            socketio.emit('B2F_zevende_kolom', 6)
             time.sleep(5)
 
 
