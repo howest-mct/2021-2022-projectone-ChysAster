@@ -322,6 +322,7 @@ function setWinner(r, c) {
   if (board[r][c] == playerBlue) {
     winner.innerText = 'Blue Wins';
   } else {
+    openWinner();
     winner.innerText = 'Yellow Wins';
   }
   gameOver = true;
@@ -335,6 +336,14 @@ function closeOpdracht() {
 
 function openOpdracht() {
   document.getElementById('myopdracht').style.display = 'block';
+}
+
+function openWinner() {
+  document.getElementById('mywinner').style.display = 'block';
+}
+
+function closeWinner() {
+  document.getElementById('mywinner').style.display = 'none';
 }
 
 //#region ***  Init / DOMContentLoaded                  ***********
