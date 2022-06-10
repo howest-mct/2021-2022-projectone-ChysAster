@@ -27,9 +27,9 @@ h2 {
   grid-area: titel;
 }
 
-.winner {
+/* .winner {
   grid-area: winner;
-}
+} */
 
 .temptitel {
   grid-area: temptitel;
@@ -135,7 +135,25 @@ h2 {
   display: none;
 }
 
+#mywinner{
+  display: none;
+}
+
 .opdracht-popup{
+  background:#e1e1e1;
+  left: 25%;
+  right: 25%;
+  top: 25%;
+  bottom: 25%;
+  width:820px;
+  position:absolute;
+  padding:30px;
+  -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow:0 0 10px rgba(0, 0, 0, 0.4)
+}
+
+.winner{
   background:#e1e1e1;
   left: 25%;
   right: 25%;
