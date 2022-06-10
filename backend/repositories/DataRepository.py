@@ -53,3 +53,9 @@ class DataRepository:
     def get_historiek():
         sql = "select idHistoriek, naam, tijdstip, waarde from Historiek left join Device ON Historiek.Device_idDevice = Device.idDevice order by idHistoriek DESC limit 10"
         return Database.get_rows(sql)
+
+    @staticmethod
+    def create_activiteit(Activiteit, isWater, aantalMinuten):
+        sql = "INSERT INTO Activiteiten(Activiteit, isWater, aantalMinuten) VALUES (%s, %s, %s)"
+        params = [Activiteit, isWater, aantalMinuten]
+        return Database.execute_sql(sql, params)
