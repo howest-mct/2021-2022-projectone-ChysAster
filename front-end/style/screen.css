@@ -9,56 +9,7 @@ h2 {
 
 /* grid */
 
-/* .container {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 0.2fr 0.2fr 2.6fr;
-  gap: 0px 0px;
-  grid-auto-flow: row;
-  grid-template-areas:
-    "titel titel titel"
-    ". winner temptitel"
-    ". board splitsing";
-}
 
-.titel {
-  grid-area: titel;
-}
-
-.winner {
-  grid-area: winner;
-}
-
-.temptitel {
-  grid-area: temptitel;
-}
-
-.board {
-  grid-area: board;
-}
-
-.splitsing {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 0.2fr 1.8fr 1fr;
-  gap: 0px 0px;
-  grid-auto-flow: row;
-  grid-template-areas:
-    "js-temperatuur js-temperatuur js-temperatuur"
-    "historiek historiek historiek"
-    ". . .";
-  grid-area: splitsing;
-}
-
-.js-temperatuur {
-  grid-area: js-temperatuur;
-}
-
-.historiek {
-  grid-area: historiek;
-  margin-left: auto;
-  margin-right: auto;
-} */
 
 .container {
   display: grid;
@@ -178,6 +129,36 @@ h2 {
 .c-table {
   margin-left: auto;
   margin-right: auto;
+}
+
+#myopdracht{  
+  display: none;
+}
+
+.opdracht-popup{
+  background:#e1e1e1;
+  left: 25%;
+  right: 25%;
+  top: 25%;
+  bottom: 25%;
+  width:820px;
+  position:absolute;
+  padding:30px;
+  -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow:0 0 10px rgba(0, 0, 0, 0.4)
+}
+
+.c-btn-opdracht{
+  background-color: #D10000;
+  /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
 }
 
 @media (min-width:414px) {}

@@ -154,6 +154,7 @@ const listenToSocket = function () {
     console.log(huidige_opdracht);
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
+    openOpdracht();
     if (counterGeel == 0) {
       let htmlString = huidige_opdracht;
       htmlOpdracht.innerHTML = htmlString;
@@ -165,6 +166,7 @@ const listenToSocket = function () {
     console.log(huidige_opdracht);
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
+    openOpdracht();
     // if (counterBlauw == 0) {
     let htmlString = huidige_opdracht;
     htmlOpdracht.innerHTML = htmlString;
@@ -326,6 +328,14 @@ function setWinner(r, c) {
 }
 
 //#endregion
+
+function closeOpdracht() {
+  document.getElementById('myopdracht').style.display = 'none';
+}
+
+function openOpdracht() {
+  document.getElementById('myopdracht').style.display = 'block';
+}
 
 //#region ***  Init / DOMContentLoaded                  ***********
 document.addEventListener('DOMContentLoaded', function () {
