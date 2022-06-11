@@ -1,9 +1,8 @@
+# imports
 import time
 from RPi import GPIO
 import threading
 from spidev import SpiDev
-
-
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify, request
@@ -12,21 +11,21 @@ from subprocess import check_output
 from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
-from matrix import Matrix
-mymatrix = Matrix()
 
+# get ip adres
 ips = check_output(['hostname', '--all-ip-addresses'])
 zonderB = str(ips)[18:32]
-print(zonderB)
-
-batchGeel = 188
-batchBlauw = 129
-
+# write ip adres to lcd
 mylcd = lcd4bit()
 mylcd.write_message(zonderB)
 
+# set your batch numbers
+batchGeel = 188
+batchBlauw = 129
+
 kleur = ''
 
+# pin numbers of connected ir sensors
 eersteKolom = 21
 tweedeKolom = 26
 derdeKolom = 20
@@ -35,19 +34,22 @@ vijfdeKolom = 19
 zesdeKolom = 13
 zevendeKolom = 6
 
-endpoint = '/api/v1'
-# Code voor Hardware
+# pin numbers of buzzer
+buzzer = 18
+buzzer2 = 17
 
+# api endpoint
+endpoint = '/api/v1'
+
+# setup serial perhipheral interface
 spi = SpiDev()
 spi2 = SpiDev()
 spi2.open(0, 1)
-spi.open(0, 0)  # Bus is 0, device is de gekozen CE-pin (0 of 1)
-spi.max_speed_hz = 100  # Klokfrequentie instellen
+spi.open(0, 0)  # Bus is 0, device is chosen CE-pin (0 or 1)
+spi.max_speed_hz = 100  # setup clock frequency
 spi2.max_speed_hz = 100
 
-buzzer = 18
-buzzer2 = 17
-    
+# setup your pi hardware
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -70,7 +72,7 @@ def setup_gpio():
     spi2.writebytes([0xc, 1])
 
 
-# Code voor Flask
+# Flask code
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'geheim!'
 socketio = SocketIO(app, cors_allowed_origins="*", logger=False,
@@ -78,15 +80,13 @@ socketio = SocketIO(app, cors_allowed_origins="*", logger=False,
 
 CORS(app)
 
-
-@socketio.on_error()        # Handles the default namespace
+# socketia error handling
+@socketio.on_error()
 def error_handler(e):
     print(e)
 
 
 # API ENDPOINTS
-
-
 @app.route('/')
 def hallo():
     return "Server is running, er zijn momenteel geen API endpoints beschikbaar."
@@ -105,53 +105,13 @@ def get_historiek():
         return jsonify(historiek=DataRepository.get_historiek()), 200
 
 
+# @socketio.on()
+# first connection socket
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
 
-
-def start_thread_aftellen_een_minuten():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_een_minuten, args=(), daemon=True)
-    thread.start()
-
-
-def start_thread_aftellen_drie_minuten():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_drie_minuten, args=(), daemon=True)
-    thread.start()
-
-
-def start_thread_aftellen_vijf_minuten():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_vijf_minuten, args=(), daemon=True)
-    thread.start()
-
-
-def start_thread_aftellen_een_minuten2():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_een_minuten, args=(), daemon=True)
-    thread.start()
-
-
-def start_thread_aftellen_drie_minuten2():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_drie_minuten, args=(), daemon=True)
-    thread.start()
-
-
-def start_thread_aftellen_vijf_minuten2():
-    print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_vijf_minuten, args=(), daemon=True)
-    thread.start()
-
-
+# socket to start timer yellow
 @socketio.on('F2B_opdracht_geel_minuten')
 def opdracht_geel_timer(jsonObject):
     if(jsonObject == 1):
@@ -161,7 +121,7 @@ def opdracht_geel_timer(jsonObject):
     elif(jsonObject == 5):
         start_thread_aftellen_vijf_minuten()
 
-
+# socket to start timer blue
 @socketio.on('F2B_opdracht_blauw_minuten')
 def opdracht_blauw_timer(jsonObject):
     if(jsonObject == 1):
@@ -171,10 +131,7 @@ def opdracht_blauw_timer(jsonObject):
     elif(jsonObject == 5):
         start_thread_aftellen_een_minuten2()
 
-
-# @socketio.on()
-# START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
-# werk enkel met de packages gevent en gevent-websocket.
+# function to get temp
 def temperatuur():
     sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
 
@@ -185,10 +142,9 @@ def temperatuur():
 
     if(t != -1):
         temp = int(lijn.split("t=")[1])
-        # print(f"het is: {temp/1000}\N{DEGREE SIGN} celcius")
         return round(temp/1000, 2)
 
-
+# function that sends temp to backend + sends temp to database
 def data_versturen():
     while True:
         print("temperatuur versturen")
@@ -197,13 +153,13 @@ def data_versturen():
         DataRepository.create_historiek(2, temperatuur())
         time.sleep(15)
 
-
+# thread for temp
 def start_thread():
     print("**** Starting THREAD ****")
     thread = threading.Thread(target=data_versturen, args=(), daemon=True)
     thread.start()
 
-
+# function that gets serial data(rfid) from arduino + controls if it is yellow or blue and sens it to frontend
 def read_serial():
     with Serial('/dev/ttyS0', 9600, bytesize=8, parity=PARITY_NONE, stopbits=1) as port:
         while True:
@@ -232,18 +188,66 @@ def read_serial():
                                   activiteit_blauw, broadcast=True)
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
-                # niet returnen anders stopt de thread
-                # return line
-
-
+# thread for serial
 def thread_serial():
     print("**** Starting THREAD serial ****")
     thread = threading.Thread(target=read_serial, args=())
     thread.start()
 
-# threads kolommen
+# frontend sends the played activity to backend and sets it as played in database
+@socketio.on('F2B_opdracht_geel_is_gespeeld')
+def set_geel_gespeeld(Activiteit):
+    DataRepository.set_gespeeld_geel(Activiteit)
+
+# frontend sends the played activity to backend and sets it as played in database
+@socketio.on('F2B_opdracht_blauw_is_gespeeld')
+def set_blauw_gespeeld(Activiteit):
+    DataRepository.set_gespeeld_blauw(Activiteit)
+
+# thread for timer game
+def start_thread_aftellen_een_minuten():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_een_minuten, args=(), daemon=True)
+    thread.start()
+
+# thread for timer game
+def start_thread_aftellen_drie_minuten():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_drie_minuten, args=(), daemon=True)
+    thread.start()
+
+# thread for timer game
+def start_thread_aftellen_vijf_minuten():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_vijf_minuten, args=(), daemon=True)
+    thread.start()
+
+# thread for timer game
+def start_thread_aftellen_een_minuten2():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_een_minuten, args=(), daemon=True)
+    thread.start()
+
+# thread for timer game
+def start_thread_aftellen_drie_minuten2():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_drie_minuten, args=(), daemon=True)
+    thread.start()
+
+# thread for timer game
+def start_thread_aftellen_vijf_minuten2():
+    print("**** Starting THREAD ****")
+    thread = threading.Thread(
+        target=aftellen_vijf_minuten, args=(), daemon=True)
+    thread.start()
 
 
+# threads colums
 def eerste_kolom():
     while True:
         if(GPIO.input(eersteKolom) == False):
@@ -251,12 +255,10 @@ def eerste_kolom():
             socketio.emit('B2F_eerste_kolom', 0)
             time.sleep(5)
 
-
 def thread_eerste_kolom():
     print("infrarood eerste kolom thread")
     thread = threading.Thread(target=eerste_kolom)
     thread.start()
-
 
 def tweede_kolom():
     while True:
@@ -265,12 +267,10 @@ def tweede_kolom():
             socketio.emit('B2F_tweede_kolom', 1)
             time.sleep(5)
 
-
 def thread_tweede_kolom():
     print("infrarood tweede kolom thread")
     thread = threading.Thread(target=tweede_kolom)
     thread.start()
-
 
 def derde_kolom():
     while True:
@@ -279,12 +279,10 @@ def derde_kolom():
             socketio.emit('B2F_derde_kolom', 2)
             time.sleep(5)
 
-
 def thread_derde_kolom():
     print("infrarood derde kolom thread")
     thread = threading.Thread(target=derde_kolom)
     thread.start()
-
 
 def vierde_kolom():
     while True:
@@ -293,12 +291,10 @@ def vierde_kolom():
             socketio.emit('B2F_vierde_kolom', 3)
             time.sleep(5)
 
-
 def thread_vierde_kolom():
     print("infrarood vierde kolom thread")
     thread = threading.Thread(target=vierde_kolom)
     thread.start()
-
 
 def vijfde_kolom():
     while True:
@@ -307,12 +303,10 @@ def vijfde_kolom():
             socketio.emit('B2F_vijfde_kolom', 4)
             time.sleep(5)
 
-
 def thread_vijfde_kolom():
     print("infrarood vijfde kolom thread")
     thread = threading.Thread(target=vijfde_kolom)
     thread.start()
-
 
 def zesde_kolom():
     while True:
@@ -321,12 +315,10 @@ def zesde_kolom():
             socketio.emit('B2F_zesde_kolom', 5)
             time.sleep(5)
 
-
 def thread_zesde_kolom():
     print("infrarood zesde kolom thread")
     thread = threading.Thread(target=zesde_kolom)
     thread.start()
-
 
 def zevende_kolom():
     while True:
@@ -335,15 +327,12 @@ def zevende_kolom():
             socketio.emit('B2F_zevende_kolom', 6)
             time.sleep(5)
 
-
 def thread_zevende_kolom():
     print("infrarood zevende kolom thread")
     thread = threading.Thread(target=zevende_kolom)
     thread.start()
 
-# buzzer en matrix
-
-
+# buzzer and matrix
 def buzzer_einde():
     GPIO.output(buzzer, GPIO.HIGH)
     time.sleep(0.5)
@@ -369,6 +358,7 @@ def buzzer_einde():
     time.sleep(0.5)
     GPIO.output(buzzer, GPIO.LOW)
 
+
 def buzzer_einde2():
     GPIO.output(buzzer2, GPIO.HIGH)
     time.sleep(0.5)
@@ -393,6 +383,7 @@ def buzzer_einde2():
     GPIO.output(buzzer2, GPIO.HIGH)
     time.sleep(0.5)
     GPIO.output(buzzer2, GPIO.LOW)
+
 
 def timer():
     spi.writebytes([0x1, 0b10000000])
@@ -1764,9 +1755,6 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
-
-
-
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':

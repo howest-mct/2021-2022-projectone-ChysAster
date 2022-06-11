@@ -154,6 +154,7 @@ const listenToSocket = function () {
     console.log(huidige_opdracht);
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
+    socket.emit('F2B_opdracht_geel_is_gespeeld', huidige_opdracht);
     openOpdracht();
     if (counterGeel == 0) {
       let htmlString = huidige_opdracht;
@@ -166,6 +167,7 @@ const listenToSocket = function () {
     console.log(huidige_opdracht);
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
+    socket.emit('F2B_opdracht_blauw_is_gespeeld', huidige_opdracht);
     openOpdracht();
     // if (counterBlauw == 0) {
     let htmlString = huidige_opdracht;

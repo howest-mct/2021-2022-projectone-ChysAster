@@ -59,3 +59,25 @@ class DataRepository:
         sql = "INSERT INTO Activiteiten(Activiteit, isWater, aantalMinuten) VALUES (%s, %s, %s)"
         params = [Activiteit, isWater, aantalMinuten]
         return Database.execute_sql(sql, params)
+
+    @staticmethod
+    def reset_geel():
+        sql = "UPDATE Activiteiten SET gespeeldGeel = 0"
+        return Database.execute_sql(sql)
+
+    @staticmethod
+    def reset_blauw():
+        sql = "UPDATE Activiteiten SET gespeeldBlauw = 0"
+        return Database.execute_sql(sql)
+
+    @staticmethod
+    def set_gespeeld_geel(Activiteit):
+        sql = "UPDATe Activiteiten SET gespeeldGeel = 1 WHERE Activiteit = %s"
+        params = [Activiteit]
+        return Database.execute_sql(sql, params)
+
+    @staticmethod
+    def set_gespeeld_blauw(Activiteit):
+        sql = "UPDATe Activiteiten SET gespeeldBlauw = 1 WHERE Activiteit = %s"
+        params = [Activiteit]
+        return Database.execute_sql(sql, params)
