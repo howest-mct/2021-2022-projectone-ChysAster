@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="script/activiteit.js"></script>
   <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png">
   <title>4 in a row</title>
 </head>
 <body>
   <h1>Nieuwe activiteit toevoegen</h1>
-  <form>
+  <form id="activiteitForm">
     <div>
       <label for="activiteit">Activiteit</label>
       <input type="text" name="activiteit" id="activiteit">
@@ -31,7 +32,7 @@
       </select>
     </div>
     <div>
-      <button type="button">Nieuwe activiteit toevoegen</button>
+      <button onclick="nieuweActiviteit()" type="button">Nieuwe activiteit toevoegen</button>
     </div>
   </form>
 </body>

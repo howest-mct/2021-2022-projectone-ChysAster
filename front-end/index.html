@@ -24,6 +24,7 @@
     </div>
     <div id="mywinner" class="winner">
       <div id="winner"></div>
+      <h4>Verwijder de schijven uit de vier op een rij.</h4>
       <button type="button" class="c-btn-opdracht" onclick="closeWinner()">Nieuw spel</button>
     </div>
     <div class="temptitel">
@@ -34,9 +35,9 @@
       <div class="js-temperatuur"></div>
     </div>
     <div class="Buttons">
-      <div class="js-button-nieuw"><a href="">NIEUW SPEL</a></div>
+      <div class="js-button-nieuw"><a onclick="newGame()" href="">NIEUW SPEL</a></div>
       <div class="js-button-historiek"><a href="historiek.html" target="_blank">HISTORIEK</a></div>
-      <div class="js-button-nieuw-activiteit"><a href="">NIEUWE ACTIVITEIT TOEVOEGEN</a></div>
+      <div class="js-button-nieuw-activiteit"><a href="toevoegen.html" target="_blank">NIEUWE ACTIVITEIT TOEVOEGEN</a></div>
       <div class="js-button-ongedaan-maken"><a href="">ONGEDAAN MAKEN</a></div>
     </div>
     <div class="opdracht-popup" id="myopdracht">  
@@ -44,6 +45,13 @@
         <div class="c-button-opdracht-position">
           <button type="button" class="c-btn-opdracht" onclick="closeOpdracht()">Starten</button>
         </div>
+  </div>
+
+  <div class="opdracht-geslaagd" id="mygeslaagd">
+    <h1>Opdracht geslaagd?</h1>
+    <div class="c-button-opdracht-position">
+      <button type="button" class="c-btn-opdracht" onclick="opdrachtGeslaagd(true)">Ja</button>
+      <button type="button" class="c-btn-opdracht" onclick="opdrachtGeslaagd(false)">Nee</button>
     </div>
   </div>
 </body>

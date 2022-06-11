@@ -34,13 +34,27 @@ class DataRepository:
         return Database.execute_sql(sql, params)
 
     @staticmethod
-    def random_activiteit():
-        sql = "SELECT Activiteit, aantalMinuten FROM Activiteiten where isWater = 0 ORDER BY RAND() LIMIT 1"
+    def random_activiteit_geel():
+        sql = "SELECT Activiteit, aantalMinuten, idActiviteiten FROM Activiteiten where isWater = 0 and gespeeldGeel = 0 ORDER BY RAND() LIMIT 1"
+        print("geel")
         return Database.get_one_row(sql)
 
     @staticmethod
-    def random_activiteit_water():
-        sql = "SELECT Activiteit, aantalMinuten FROM Activiteiten WHERE isWater = 0 or isWater = 1 ORDER BY RAND() LIMIT 1"
+    def random_activiteit_water_geel():
+        sql = "SELECT Activiteit, aantalMinuten, idActiviteiten FROM Activiteiten WHERE gespeeldGeel = 0 ORDER BY RAND() LIMIT 1"
+        print("geel water")
+        return Database.get_one_row(sql)
+
+    @staticmethod
+    def random_activiteit_blauw():
+        sql = "SELECT Activiteit, aantalMinuten, idActiviteiten FROM Activiteiten where isWater = 0 and gespeeldBlauw = 0 ORDER BY RAND() LIMIT 1"
+        print("blauw")
+        return Database.get_one_row(sql)
+
+    @staticmethod
+    def random_activiteit_water_blauw():
+        sql = "SELECT Activiteit, aantalMinuten, idActiviteiten FROM Activiteiten WHERE gespeeldBlauw = 0 ORDER BY RAND() LIMIT 1"
+        print("blauw water")
         return Database.get_one_row(sql)
 
     @staticmethod
@@ -71,13 +85,13 @@ class DataRepository:
         return Database.execute_sql(sql)
 
     @staticmethod
-    def set_gespeeld_geel(Activiteit):
-        sql = "UPDATe Activiteiten SET gespeeldGeel = 1 WHERE Activiteit = %s"
-        params = [Activiteit]
+    def set_gespeeld_geel(idActiviteiten):
+        sql = "UPDATE Activiteiten SET gespeeldGeel = 1 WHERE idActiviteiten = %s"
+        params = [idActiviteiten]
         return Database.execute_sql(sql, params)
 
     @staticmethod
-    def set_gespeeld_blauw(Activiteit):
-        sql = "UPDATe Activiteiten SET gespeeldBlauw = 1 WHERE Activiteit = %s"
-        params = [Activiteit]
+    def set_gespeeld_blauw(idActiviteiten):
+        sql = "UPDATE Activiteiten SET gespeeldBlauw = 1 WHERE idActiviteiten = %s"
+        params = [idActiviteiten]
         return Database.execute_sql(sql, params)

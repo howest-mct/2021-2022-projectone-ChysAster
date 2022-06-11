@@ -1,5 +1,6 @@
 # imports
 import time
+import json
 from RPi import GPIO
 import threading
 from spidev import SpiDev
@@ -18,16 +19,23 @@ zonderB = str(ips)[18:32]
 # write ip adres to lcd
 mylcd = lcd4bit()
 mylcd.write_message(zonderB)
+mylcd.second_line()
+mylcd.write_message("Scan your badge")
 
 # set your batch numbers
-batchGeel = 188
-batchBlauw = 129
+badgeGeel = 188
+badgeBlauw = 129
+opdrachtGestartBlauw = False
+opdrachtGestartGeel = False
+opdrachtGeslaagdGeel = False
+opdrachtGeslaagdBlauw = False
+
 
 kleur = ''
 
 # pin numbers of connected ir sensors
 eersteKolom = 21
-tweedeKolom = 26
+tweedeKolom = 22
 derdeKolom = 20
 vierdeKolom = 16
 vijfdeKolom = 19
@@ -50,6 +58,8 @@ spi.max_speed_hz = 100  # setup clock frequency
 spi2.max_speed_hz = 100
 
 # setup your pi hardware
+
+
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
@@ -81,6 +91,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", logger=False,
 CORS(app)
 
 # socketia error handling
+
+
 @socketio.on_error()
 def error_handler(e):
     print(e)
@@ -92,11 +104,15 @@ def hallo():
     return "Server is running, er zijn momenteel geen API endpoints beschikbaar."
 
 
-@app.route(endpoint + '/activiteiten/', methods=['GET'])
+@app.route(endpoint + '/activiteiten/', methods=['GET', 'POST'])
 def get_activiteit():
     if request.method == 'GET':
-
         return jsonify(activiteit=DataRepository.random_activiteit()), 200
+    elif request.method == 'POST':
+        gegevens = DataRepository.json_or_formdata(request)
+        nieuw_id = DataRepository.create_activiteit(
+            gegevens['Activiteit'], gegevens['isWater'], gegevens['aantalMinuten'])
+        return jsonify(activiteitid=nieuw_id), 201
 
 
 @app.route(endpoint + '/historiek/', methods=['GET'])
@@ -112,26 +128,32 @@ def initial_connection():
     print('A new client connect')
 
 # socket to start timer yellow
+
+
 @socketio.on('F2B_opdracht_geel_minuten')
-def opdracht_geel_timer(jsonObject):
-    if(jsonObject == 1):
+def opdracht_geel_timer(minuten_geel):
+    if(minuten_geel == 1):
         start_thread_aftellen_een_minuten()
-    elif(jsonObject == 3):
+    elif(minuten_geel == 3):
         start_thread_aftellen_drie_minuten()
-    elif(jsonObject == 5):
+    elif(minuten_geel == 5):
         start_thread_aftellen_vijf_minuten()
 
 # socket to start timer blue
+
+
 @socketio.on('F2B_opdracht_blauw_minuten')
-def opdracht_blauw_timer(jsonObject):
-    if(jsonObject == 1):
+def opdracht_blauw_timer(minuten_blauw):
+    if(minuten_blauw == 1):
         start_thread_aftellen_een_minuten2()
-    elif(jsonObject == 3):
-        start_thread_aftellen_een_minuten2()
-    elif(jsonObject == 5):
-        start_thread_aftellen_een_minuten2()
+    elif(minuten_blauw == 3):
+        start_thread_aftellen_drie_minuten2()
+    elif(minuten_blauw == 5):
+        start_thread_aftellen_vijf_minuten2()
 
 # function to get temp
+
+
 def temperatuur():
     sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
 
@@ -144,7 +166,22 @@ def temperatuur():
         temp = int(lijn.split("t=")[1])
         return round(temp/1000, 2)
 
+# Function to restart game
+
+
+@socketio.on('F2B_restart_game')
+def restart_game():
+    global opdrachtGestartBlauw, opdrachtGestartGeel, opdrachtGeslaagdGeel, opdrachtGeslaagdBlauw
+    opdrachtGestartBlauw = False
+    opdrachtGestartGeel = False
+    opdrachtGeslaagdGeel = False
+    opdrachtGeslaagdBlauw = False
+    DataRepository.reset_blauw()
+    DataRepository.reset_geel()
+
 # function that sends temp to backend + sends temp to database
+
+
 def data_versturen():
     while True:
         print("temperatuur versturen")
@@ -154,57 +191,121 @@ def data_versturen():
         time.sleep(15)
 
 # thread for temp
+
+
 def start_thread():
     print("**** Starting THREAD ****")
     thread = threading.Thread(target=data_versturen, args=(), daemon=True)
     thread.start()
 
 # function that gets serial data(rfid) from arduino + controls if it is yellow or blue and sens it to frontend
+
+
 def read_serial():
+    global opdrachtGestartBlauw, opdrachtGestartGeel
     with Serial('/dev/ttyS0', 9600, bytesize=8, parity=PARITY_NONE, stopbits=1) as port:
         while True:
             if port.in_waiting > 0:
                 line = port.readline().decode('utf-8')  .rstrip()
                 print(line)
-                if line == str(batchGeel):
+                if line == str(badgeGeel):
+                    mylcd.clear_lcd()
+                    mylcd.write_message(zonderB)
+                    mylcd.second_line()
+                    mylcd.write_message("Team geel")
                     DataRepository.create_historiek(1, "geel")
                     # socketio.emit('B2F_rfid_data_geel', "geel", broadcast=True)
                     kleur = 'geel'
-                    if(temperatuur() > 24):
-                        activiteit_geel = DataRepository.random_activiteit_water()
-                    elif(temperatuur() < 24):
-                        activiteit_geel = DataRepository.random_activiteit()
-                    socketio.emit('B2F_opdracht_geel',
-                                  activiteit_geel, broadcast=True)
-                elif line == str(batchBlauw):
+                    if opdrachtGestartGeel == False:
+                        if(temperatuur() > 24):
+                            activiteit_geel = DataRepository.random_activiteit_water_geel()
+                        elif(temperatuur() < 24):
+                            activiteit_geel = DataRepository.random_activiteit_geel()
+                        opdrachtGestartGeel = True
+                        socketio.emit('B2F_opdracht_geel',
+                                      activiteit_geel, broadcast=True)
+                    else:
+                        socketio.emit('B2F_geslaagd_geel')
+                elif line == str(badgeBlauw):
+                    mylcd.clear_lcd()
+                    mylcd.write_message(zonderB)
+                    mylcd.second_line()
+                    mylcd.write_message("Team blauw")
                     DataRepository.create_historiek(1, "blauw")
                     # socketio.emit('B2F_rfid_data_rood', "rood", broadcast=True)
                     kleur = 'blauw'
-                    if(temperatuur() > 24):
-                        activiteit_blauw = DataRepository.random_activiteit_water()
-                    elif(temperatuur() < 24):
-                        activiteit_blauw = DataRepository.random_activiteit()
-                    socketio.emit('B2F_opdracht_blauw',
-                                  activiteit_blauw, broadcast=True)
+                    if opdrachtGestartBlauw == False:
+                        if(temperatuur() > 24):
+                            activiteit_blauw = DataRepository.random_activiteit_water_blauw()
+                        elif(temperatuur() < 24):
+                            activiteit_blauw = DataRepository.random_activiteit_blauw()
+                        opdrachtGestartBlauw = True
+                        socketio.emit('B2F_opdracht_blauw',
+                                      activiteit_blauw, broadcast=True)
+                    else:
+                        socketio.emit('B2F_geslaagd_blauw')
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
 # thread for serial
+
+
 def thread_serial():
     print("**** Starting THREAD serial ****")
     thread = threading.Thread(target=read_serial, args=())
     thread.start()
 
-# frontend sends the played activity to backend and sets it as played in database
-@socketio.on('F2B_opdracht_geel_is_gespeeld')
-def set_geel_gespeeld(Activiteit):
-    DataRepository.set_gespeeld_geel(Activiteit)
+
+@socketio.on('F2B_opdracht_geslaagd')
+def opdracht_geslaagd(Geslaagd):
+    global opdrachtGestartBlauw, opdrachtGestartGeel, opdrachtGeslaagdGeel, opdrachtGeslaagdBlauw
+    if Geslaagd['geslaagd'] == False:
+        if Geslaagd['kleur'] == 'geel':
+            if(temperatuur() > 24):
+                activiteit_geel = DataRepository.random_activiteit_water_geel()
+            elif(temperatuur() < 24):
+                activiteit_geel = DataRepository.random_activiteit_geel()
+            opdrachtGestartGeel = True
+            socketio.emit('B2F_opdracht_geel',
+                          activiteit_geel, broadcast=True)
+        elif Geslaagd['kleur'] == 'blauw':
+            if(temperatuur() > 24):
+                activiteit_blauw = DataRepository.random_activiteit_water_blauw()
+            elif(temperatuur() < 24):
+                activiteit_blauw = DataRepository.random_activiteit_blauw()
+            opdrachtGestartBlauw = True
+            socketio.emit('B2F_opdracht_blauw',
+                          activiteit_blauw, broadcast=True)
+        else:
+            print("Kleur niet gekend")
+    else:
+        print("Opdracht is geslaagd")
+        if Geslaagd['kleur'] == 'geel':
+            opdrachtGeslaagdGeel = True
+            opdrachtGestartGeel = False
+            clear_memory()
+        elif Geslaagd['kleur'] == 'blauw':
+            opdrachtGeslaagdBlauw = True
+            opdrachtGestartBlauw = False
+            clear_memory2()
+
 
 # frontend sends the played activity to backend and sets it as played in database
+
+
+@socketio.on('F2B_opdracht_geel_is_gespeeld')
+def set_geel_gespeeld(idActiviteiten):
+    DataRepository.set_gespeeld_geel(idActiviteiten)
+
+# frontend sends the played activity to backend and sets it as played in database
+
+
 @socketio.on('F2B_opdracht_blauw_is_gespeeld')
-def set_blauw_gespeeld(Activiteit):
-    DataRepository.set_gespeeld_blauw(Activiteit)
+def set_blauw_gespeeld(idActiviteiten):
+    DataRepository.set_gespeeld_blauw(idActiviteiten)
 
 # thread for timer game
+
+
 def start_thread_aftellen_een_minuten():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
@@ -212,6 +313,8 @@ def start_thread_aftellen_een_minuten():
     thread.start()
 
 # thread for timer game
+
+
 def start_thread_aftellen_drie_minuten():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
@@ -219,6 +322,8 @@ def start_thread_aftellen_drie_minuten():
     thread.start()
 
 # thread for timer game
+
+
 def start_thread_aftellen_vijf_minuten():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
@@ -226,113 +331,98 @@ def start_thread_aftellen_vijf_minuten():
     thread.start()
 
 # thread for timer game
+
+
 def start_thread_aftellen_een_minuten2():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
-        target=aftellen_een_minuten, args=(), daemon=True)
+        target=aftellen_een_minuten2, args=(), daemon=True)
     thread.start()
 
 # thread for timer game
+
+
 def start_thread_aftellen_drie_minuten2():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
-        target=aftellen_drie_minuten, args=(), daemon=True)
+        target=aftellen_drie_minuten2, args=(), daemon=True)
     thread.start()
 
 # thread for timer game
+
+
 def start_thread_aftellen_vijf_minuten2():
     print("**** Starting THREAD ****")
     thread = threading.Thread(
-        target=aftellen_vijf_minuten, args=(), daemon=True)
+        target=aftellen_vijf_minuten2, args=(), daemon=True)
     thread.start()
 
+
+def mag_schijf_spelen():
+    global opdrachtGeslaagdGeel, opdrachtGeslaagdBlauw
+    if (opdrachtGeslaagdBlauw == True or opdrachtGeslaagdGeel == True):
+        return True
+    else:
+        return False
 
 # threads colums
-def eerste_kolom():
+
+
+def kolom():
+    global opdrachtGeslaagdGeel, opdrachtGeslaagdBlauw
     while True:
-        if(GPIO.input(eersteKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_eerste_kolom', 0)
+        if(GPIO.input(eersteKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 0")
+            socketio.emit('B2F_kolom', 0)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(tweedeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 1")
+            socketio.emit('B2F_kolom', 1)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(derdeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 2")
+            socketio.emit('B2F_kolom', 2)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(vierdeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 3")
+            socketio.emit('B2F_kolom', 3)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(vijfdeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 4")
+            socketio.emit('B2F_kolom', 4)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(zesdeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 5")
+            socketio.emit('B2F_kolom', 5)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
+            time.sleep(5)
+        elif (GPIO.input(zevendeKolom) == False and mag_schijf_spelen()):
+            print("versturen infrarood 6")
+            socketio.emit('B2F_kolom', 6)
+            opdrachtGeslaagdBlauw = False
+            opdrachtGeslaagdGeel = False
             time.sleep(5)
 
-def thread_eerste_kolom():
-    print("infrarood eerste kolom thread")
-    thread = threading.Thread(target=eerste_kolom)
-    thread.start()
 
-def tweede_kolom():
-    while True:
-        if(GPIO.input(tweedeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_tweede_kolom', 1)
-            time.sleep(5)
-
-def thread_tweede_kolom():
-    print("infrarood tweede kolom thread")
-    thread = threading.Thread(target=tweede_kolom)
-    thread.start()
-
-def derde_kolom():
-    while True:
-        if(GPIO.input(derdeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_derde_kolom', 2)
-            time.sleep(5)
-
-def thread_derde_kolom():
-    print("infrarood derde kolom thread")
-    thread = threading.Thread(target=derde_kolom)
-    thread.start()
-
-def vierde_kolom():
-    while True:
-        if(GPIO.input(vierdeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_vierde_kolom', 3)
-            time.sleep(5)
-
-def thread_vierde_kolom():
-    print("infrarood vierde kolom thread")
-    thread = threading.Thread(target=vierde_kolom)
-    thread.start()
-
-def vijfde_kolom():
-    while True:
-        if(GPIO.input(vijfdeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_vijfde_kolom', 4)
-            time.sleep(5)
-
-def thread_vijfde_kolom():
-    print("infrarood vijfde kolom thread")
-    thread = threading.Thread(target=vijfde_kolom)
-    thread.start()
-
-def zesde_kolom():
-    while True:
-        if(GPIO.input(zesdeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_zesde_kolom', 5)
-            time.sleep(5)
-
-def thread_zesde_kolom():
-    print("infrarood zesde kolom thread")
-    thread = threading.Thread(target=zesde_kolom)
-    thread.start()
-
-def zevende_kolom():
-    while True:
-        if(GPIO.input(zevendeKolom) == False):
-            print("versturen infrarood")
-            socketio.emit('B2F_zevende_kolom', 6)
-            time.sleep(5)
-
-def thread_zevende_kolom():
-    print("infrarood zevende kolom thread")
-    thread = threading.Thread(target=zevende_kolom)
+def thread_kolom():
+    print("infrarood kolom thread")
+    thread = threading.Thread(target=kolom)
     thread.start()
 
 # buzzer and matrix
+
+
 def buzzer_einde():
     GPIO.output(buzzer, GPIO.HIGH)
     time.sleep(0.5)
@@ -1756,6 +1846,7 @@ def aftellen_een_minuten2():
     timeOut2()
     clear_memory2()
 
+
     # ANDERE FUNCTIES
 if __name__ == '__main__':
     try:
@@ -1763,13 +1854,7 @@ if __name__ == '__main__':
         print("**** Starting APP ****")
         start_thread()
         thread_serial()
-        thread_eerste_kolom()
-        thread_tweede_kolom()
-        thread_derde_kolom()
-        thread_vierde_kolom()
-        thread_vijfde_kolom()
-        thread_zesde_kolom()
-        thread_zevende_kolom()
+        thread_kolom()
         socketio.run(app, debug=False, host='0.0.0.0')
 
     except KeyboardInterrupt:

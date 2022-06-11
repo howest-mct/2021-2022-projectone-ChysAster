@@ -6,11 +6,15 @@ const socket = io(`http://${lanIP}`);
 //#region ***  DOM references                           ***********
 let htmlHistoriek, htmlIndex, htmlOpdracht;
 //#endregion
-
-let huidige_opdracht = '';
-let aantal_minuten = 0;
+let kleur = '';
+let huidige_opdracht_geel = '';
+let huidige_opdracht_blauw = '';
+let aantal_minuten_geel = 0;
+let aantal_minuten_blauw = 0;
 let counterBlauw = 0;
 let counterGeel = 0;
+let idGeel = 0;
+let idBlauw = 0;
 
 //#region ***  4 in a row references                           ***********
 let r;
@@ -57,79 +61,18 @@ const positieKolom = function (number) {
   c = number;
 };
 
-// const positieTweedeKolom = function () {
-//   r = 0;
-//   c = 1;
-// };
-
-// const positieDerdeKolom = function () {
-//   r = 0;
-//   c = 2;
-// };
-
-// const positieVierdeKolom = function () {
-//   r = 0;
-//   c = 3;
-// };
-
-// const positieVijfdeKolom = function () {
-//   r = 0;
-//   c = 4;
-// };
-
-// const positieZesdeKolom = function () {
-//   r = 0;
-//   c = 5;
-// };
-
-// const positieZevendeKolom = function () {
-//   r = 0;
-//   c = 6;
-// };
-
 //#endregion
 
 //#region ***  Event Listeners - listenTo___            ***********
 
 const gescand = function () {
   socket.on('B2F_rfid_data', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
     handle_gescand(jsonObject);
   });
 };
 
 const listenToSocketGame = function () {
-  socket.on('B2F_eerste_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_tweede_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_derde_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_vierde_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_vijfde_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_zesde_kolom', function (jsonObject) {
-    console.log(`Blok in ${jsonObject + 1} kolom`);
-    positieKolom(jsonObject);
-    setPiece();
-  });
-  socket.on('B2F_zevende_kolom', function (jsonObject) {
+  socket.on('B2F_kolom', function (jsonObject) {
     console.log(`Blok in ${jsonObject + 1} kolom`);
     positieKolom(jsonObject);
     setPiece();
@@ -150,32 +93,53 @@ const listenToSocket = function () {
   });
 
   socket.on('B2F_opdracht_geel', function (jsonObject) {
-    huidige_opdracht = jsonObject.Activiteit;
-    console.log(huidige_opdracht);
-    aantal_minuten = jsonObject.aantalMinuten;
-    socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
-    socket.emit('F2B_opdracht_geel_is_gespeeld', huidige_opdracht);
-    // openOpdracht();
-    if (counterGeel == 0) {
-      let htmlString = huidige_opdracht;
-      htmlOpdracht.innerHTML = htmlString;
-    }
+    huidige_opdracht_geel = jsonObject.Activiteit;
+    console.log(huidige_opdracht_geel);
+    aantal_minuten_geel = jsonObject.aantalMinuten;
+    idGeel = jsonObject.idActiviteiten;
+    let htmlString = huidige_opdracht_geel;
+    htmlOpdracht.innerHTML = htmlString;
+    openOpdracht();
+    socket.emit('F2B_opdracht_geel_is_gespeeld', idGeel);
   });
 
   socket.on('B2F_opdracht_blauw', function (jsonObject) {
-    huidige_opdracht = jsonObject.Activiteit;
-    console.log(huidige_opdracht);
-    aantal_minuten = jsonObject.aantalMinuten;
-    socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
-    socket.emit('F2B_opdracht_blauw_is_gespeeld', huidige_opdracht);
-
-    // if (counterBlauw == 0) {
-    let htmlString = huidige_opdracht;
+    huidige_opdracht_blauw = jsonObject.Activiteit;
+    console.log(huidige_opdracht_blauw);
+    aantal_minuten_blauw = jsonObject.aantalMinuten;
+    idBlauw = jsonObject.idActiviteiten;
+    let htmlString = huidige_opdracht_blauw;
     htmlOpdracht.innerHTML = htmlString;
-    // }
+    openOpdracht();
+    socket.emit('F2B_opdracht_blauw_is_gespeeld', idBlauw);
+  });
+
+  socket.on('B2F_geslaagd_geel', function () {
+    console.log('B2F_geslaagd_geel');
+    kleur = 'geel';
+    openGeslaagd();
+  });
+
+  socket.on('B2F_geslaagd_blauw', function () {
+    console.log('B2F_geslaagd_blauw');
+    kleur = 'blauw';
+    openGeslaagd();
   });
 };
 //#endregion
+
+const opdrachtGeslaagd = function (geslaagd) {
+  console.log('geslaagd: ', geslaagd);
+  socket.emit('F2B_opdracht_geslaagd', {
+    kleur: kleur,
+    geslaagd: geslaagd,
+  });
+  closeGeslaagd();
+};
+
+const newGame = function () {
+  socket.emit('F2B_restart_game');
+};
 
 //#region ***  4 OP EEN RIJ CODE                           ***********
 // let playerRed = "R";
@@ -185,24 +149,11 @@ let currPlayer = null; //= playerYellow
 
 const handle_gescand = function (json) {
   if (json == 'geel') {
-    counterGeel += 1;
-    if (counterGeel == 1) {
-      console.log('Team geel opdracht uitvoeren');
-      openOpdracht();
-    } else if (counterGeel == 2) {
-      currPlayer = playerYellow;
-      counterGeel = 0;
-    }
+    currPlayer = playerYellow;
   } else if (json == 'blauw') {
     // currPlayer = playerRed
-    counterBlauw += 1;
-    if (counterBlauw == 1) {
-      console.log('Team blauw opdracht uitvoeren');
-      openOpdracht();
-    } else if (counterBlauw == 2) {
-      currPlayer = playerBlue;
-      counterBlauw = 0;
-    }
+
+    currPlayer = playerBlue;
   }
 };
 
@@ -323,19 +274,31 @@ function checkWinner() {
 
 function setWinner(r, c) {
   let winner = document.getElementById('winner');
+  let htmlString = '';
   if (board[r][c] == playerBlue) {
-    winner.innerText = 'Blauw wint';
+    openWinner();
+    htmlString = 'Blauw wint';
   } else {
     openWinner();
-    winner.innerText = 'Geel wint';
+    htmlString = 'Geel wint';
   }
+  winner.innerHTML = htmlString;
   gameOver = true;
 }
 
 //#endregion
+function closeGeslaagd() {
+  document.getElementById('mygeslaagd').style.display = 'none';
+}
+
+function openGeslaagd() {
+  document.getElementById('mygeslaagd').style.display = 'block';
+}
 
 function closeOpdracht() {
   document.getElementById('myopdracht').style.display = 'none';
+  socket.emit('F2B_opdracht_geel_minuten', aantal_minuten_geel);
+  socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten_blauw);
 }
 
 function openOpdracht() {
