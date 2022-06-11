@@ -155,7 +155,7 @@ const listenToSocket = function () {
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_geel_minuten', aantal_minuten);
     socket.emit('F2B_opdracht_geel_is_gespeeld', huidige_opdracht);
-    openOpdracht();
+    // openOpdracht();
     if (counterGeel == 0) {
       let htmlString = huidige_opdracht;
       htmlOpdracht.innerHTML = htmlString;
@@ -168,7 +168,7 @@ const listenToSocket = function () {
     aantal_minuten = jsonObject.aantalMinuten;
     socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten);
     socket.emit('F2B_opdracht_blauw_is_gespeeld', huidige_opdracht);
-    openOpdracht();
+
     // if (counterBlauw == 0) {
     let htmlString = huidige_opdracht;
     htmlOpdracht.innerHTML = htmlString;
@@ -188,6 +188,7 @@ const handle_gescand = function (json) {
     counterGeel += 1;
     if (counterGeel == 1) {
       console.log('Team geel opdracht uitvoeren');
+      openOpdracht();
     } else if (counterGeel == 2) {
       currPlayer = playerYellow;
       counterGeel = 0;
@@ -197,6 +198,7 @@ const handle_gescand = function (json) {
     counterBlauw += 1;
     if (counterBlauw == 1) {
       console.log('Team blauw opdracht uitvoeren');
+      openOpdracht();
     } else if (counterBlauw == 2) {
       currPlayer = playerBlue;
       counterBlauw = 0;
@@ -322,10 +324,10 @@ function checkWinner() {
 function setWinner(r, c) {
   let winner = document.getElementById('winner');
   if (board[r][c] == playerBlue) {
-    winner.innerText = 'Blue Wins';
+    winner.innerText = 'Blauw wint';
   } else {
     openWinner();
-    winner.innerText = 'Yellow Wins';
+    winner.innerText = 'Geel wint';
   }
   gameOver = true;
 }
