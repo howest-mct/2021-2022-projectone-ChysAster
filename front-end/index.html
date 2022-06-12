@@ -1,59 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4 in a row</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="style/screen.css" />
+    <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png" />
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="script/app.js"></script>
+    <script src="script/datahandler.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4 in a row</title>
-  <link rel="stylesheet" type="text/css" media="screen" href="style/screen.css">
-  <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png">
-  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"
-    integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU"
-    crossorigin="anonymous"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="script/app.js"></script>
-  <script src="script/datahandler.js"></script>
-
-</head>
-
-<body class="html-index">
-  <div class="container">
-    <div class="titel">
-      <h1>4 OP EEN RIJ</h1>
+  <body class="html-index">
+    <div class="titel py-5 dark:bg-gray-800 bg-gray-200">
+      <h1 class="text-4xl dark:text-white font-bold text-center">4 OP EEN RIJ</h1>
     </div>
+    <div class="w-full min-h-screen flex flex-wrap sm:flex-nowrap flex-row sm:flex-column dark:bg-gray-600">
+      <div class="navigatie w-full sm:w-96 m-5">
+        <div class="Buttons w-full">
+          <a onclick="newGame()" href="">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-nieuw">NIEUW SPEL</button>
+          </a>
+          <a href="historiek.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-historiek">HISTORIEK</button>
+          </a>
+          <a href="toevoegen.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-nieuw-activiteit">NIEUWE ACTIVITEIT TOEVOEGEN</button>
+          </a>
+          <a onclick="verwijderPiece()">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">ONGEDAAN MAKEN</button>
+          </a>
+        </div>
+      </div>
+      <div class="spel w-full m-5">
+        <div id="board" class="board-grid"></div>
+      </div>
+      <div class="gegevens w-full sm:w-96 m-5">
+        <h2 class="text-xl text-center dark:text-white">Temperatuur</h2>
+        <div class="js-temperatuur text-center dark:text-white">00.00 ° C</div>
+      </div>
+    </div>
+
     <div id="mywinner" class="winner">
       <div id="winner"></div>
       <h4>Verwijder de schijven uit de vier op een rij.</h4>
       <button type="button" class="c-btn-opdracht" onclick="closeWinner()">Nieuw spel</button>
     </div>
-    <div class="temptitel">
-      <h2>Temperatuur</h2>
-    </div>
-    <div id="board" class="board"></div>
-    <div class="splitsing">
-      <div class="js-temperatuur"></div>
-    </div>
-    <div class="Buttons">
-      <div class="js-button-nieuw"><a onclick="newGame()" href="">NIEUW SPEL</a></div>
-      <div class="js-button-historiek"><a href="historiek.html" target="_blank">HISTORIEK</a></div>
-      <div class="js-button-nieuw-activiteit"><a href="toevoegen.html" target="_blank">NIEUWE ACTIVITEIT TOEVOEGEN</a></div>
-      <div class="js-button-ongedaan-maken"><a href="">ONGEDAAN MAKEN</a></div>
-    </div>
-    <div class="opdracht-popup" id="myopdracht">  
-        <h1 class="js-opdracht"></h1>
-        <div class="c-button-opdracht-position">
-          <button type="button" class="c-btn-opdracht" onclick="closeOpdracht()">Starten</button>
-        </div>
-  </div>
 
-  <div class="opdracht-geslaagd" id="mygeslaagd">
-    <h1>Opdracht geslaagd?</h1>
-    <div class="c-button-opdracht-position">
-      <button type="button" class="c-btn-opdracht" onclick="opdrachtGeslaagd(true)">Ja</button>
-      <button type="button" class="c-btn-opdracht" onclick="opdrachtGeslaagd(false)">Nee</button>
+    <div class="opdracht-popup" id="myopdracht">
+      <h1 class="js-opdracht"></h1>
+      <div class="">
+        <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="closeOpdracht()">Starten</button>
+      </div>
     </div>
-  </div>
-</body>
 
+    <div class="opdracht-popup" id="mygeslaagd">
+      <h1>Opdracht geslaagd?</h1>
+      <div class="">
+        <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="opdrachtGeslaagd(true)">Ja</button>
+        <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="opdrachtGeslaagd(false)">Nee</button>
+      </div>
+    </div>
+  </body>
 </html>

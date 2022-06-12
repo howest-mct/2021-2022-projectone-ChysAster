@@ -22,6 +22,7 @@ mylcd.write_message(zonderB)
 mylcd.second_line()
 mylcd.write_message("Scan your badge")
 
+
 # set your batch numbers
 badgeGeel = 188
 badgeBlauw = 129
@@ -46,6 +47,8 @@ zevendeKolom = 6
 buzzer = 18
 buzzer2 = 17
 
+buttonOngedaan = 27
+prev_status_button = GPIO.LOW
 # api endpoint
 endpoint = '/api/v1'
 
@@ -70,6 +73,8 @@ def setup_gpio():
     GPIO.setup(vijfdeKolom, GPIO.IN)
     GPIO.setup(zesdeKolom, GPIO.IN)
     GPIO.setup(zevendeKolom, GPIO.IN)
+    GPIO.setup(buttonOngedaan, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.add_event_detect(buttonOngedaan, GPIO.RISING, callback=button_pressed)
     GPIO.setup(buzzer, GPIO.OUT)
     GPIO.setup(buzzer2, GPIO.OUT)
     spi.writebytes([0x9, 0])
@@ -111,7 +116,7 @@ def get_activiteit():
     elif request.method == 'POST':
         gegevens = DataRepository.json_or_formdata(request)
         nieuw_id = DataRepository.create_activiteit(
-            gegevens['Activiteit'], gegevens['isWater'], gegevens['aantalMinuten'])
+            gegevens['activiteit'], gegevens['isWater'], gegevens['aantalMinuten'])
         return jsonify(activiteitid=nieuw_id), 201
 
 
@@ -302,6 +307,11 @@ def set_geel_gespeeld(idActiviteiten):
 @socketio.on('F2B_opdracht_blauw_is_gespeeld')
 def set_blauw_gespeeld(idActiviteiten):
     DataRepository.set_gespeeld_blauw(idActiviteiten)
+
+
+def button_pressed(channel):
+    socketio.emit('B2F_ongedaan_maken')
+
 
 # thread for timer game
 
@@ -1845,7 +1855,6 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
-
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':

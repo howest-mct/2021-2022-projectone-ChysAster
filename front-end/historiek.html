@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png" />
+    <title>4 in a row</title>
+    <link rel="stylesheet" href="style/screen.css" />
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="script/app.js"></script>
+    <script src="script/datahandler.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png">
-  <title>4 in a row</title>
-  <link rel="stylesheet" href="style/screen.css">
-  <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"
-    integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU"
-    crossorigin="anonymous"></script>
-  <script src="script/app.js"></script>
-  <script src="script/datahandler.js"></script>
-</head>
-
-<body>
-  <h1>Historiek</h1>
-  <div class="historiek">
-    <table class="c-table">
-      <tr>
-        <th>id</th>
-        <th>Device</th>
-        <th>Tijdstip</th>
-        <th>Waarde</th>
-      </tr>
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-    </table>
-  </div>
-</body>
-
+  <body>
+    <div class="titel py-5 dark:bg-gray-800 bg-gray-200">
+      <h1 class="text-4xl font-bold text-center dark:text-white">Historiek</h1>
+    </div>
+    <div class="w-full min-h-screen flex flex-wrap sm:flex-nowrap flex-row sm:flex-column dark:bg-gray-600">
+      <div class="navigatie w-full sm:w-96 m-5">
+        <div class="Buttons w-full">
+          <a href="index.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-nieuw">Home</button>
+          </a>
+          <a href="toevoegen.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-historiek">Activiteit toevoegen</button>
+          </a>
+        </div>
+      </div>
+      <div class="w-full sm:m-5">
+        <div class="historiek dark:text-white"></div>
+      </div>
+    </div>
+  </body>
 </html>

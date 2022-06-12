@@ -19,26 +19,28 @@ let idBlauw = 0;
 //#region ***  4 in a row references                           ***********
 let r;
 let c;
+
+let laatstGezetteTile = null;
 //#endregion
 
 //#region ***  Callback-Visualisation - show___         ***********
 const showHistoriek = function (jsonObject) {
   console.log(jsonObject);
-  let htmlString = `<table class="c-table">
+  let htmlString = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>
-        <th>id</th>
-        <th>Device</th>
-        <th>Tijdstip</th>
-        <th>Waarde</th>
+        <th class="bg-gray-200 dark:bg-gray-800">id</th>
+        <th class="bg-gray-200 dark:bg-gray-800">Device</th>
+        <th class="bg-gray-200 dark:bg-gray-800">Tijdstip</th>
+        <th class="bg-gray-200 dark:bg-gray-800">Waarde</th>
       </tr>`;
 
   for (const historiek of jsonObject.historiek) {
     htmlString += `
           <tr>
-            <td>${historiek.idHistoriek}</td>
-            <td>${historiek.naam}</td>
-            <td>${historiek.tijdstip}</td>
-            <td>${historiek.waarde}</td>
+            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.idHistoriek}</td>
+            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.naam}</td>
+            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.tijdstip}</td>
+            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.waarde}</td>
           </tr>
         `;
   }
@@ -125,6 +127,10 @@ const listenToSocket = function () {
     kleur = 'blauw';
     openGeslaagd();
   });
+
+  socket.on('B2F_ongedaan_maken', function () {
+    verwijderPiece();
+  });
 };
 //#endregion
 
@@ -187,6 +193,15 @@ function setGame() {
   }
 }
 
+function verwijderPiece() {
+  if (laatstGezetteTile != null) {
+    laatstGezetteTile.classList.remove('blue-piece');
+    laatstGezetteTile.classList.remove('yellow-piece');
+    r += 1; //update the row height for that column start bij het laagste
+    currColumns[c] = r; //update the array
+  }
+}
+
 function setPiece() {
   if (gameOver) {
     return; //als er een winner is doe niets
@@ -207,6 +222,7 @@ function setPiece() {
 
   board[r][c] = currPlayer; //update JS board
   let tile = document.getElementById(r.toString() + '-' + c.toString());
+  laatstGezetteTile = tile;
   if (currPlayer == playerBlue) {
     // tile.classList.add("red-piece"); //nu zetten we een stuk op de locatie waar we klikken
     tile.classList.add('blue-piece'); //nu zetten we een stuk op de locatie waar we klikken

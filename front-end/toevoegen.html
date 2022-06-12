@@ -1,39 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="script/activiteit.js"></script>
-  <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png">
-  <title>4 in a row</title>
-</head>
-<body>
-  <h1>Nieuwe activiteit toevoegen</h1>
-  <form id="activiteitForm">
-    <div>
-      <label for="activiteit">Activiteit</label>
-      <input type="text" name="activiteit" id="activiteit">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="script/activiteit.js"></script>
+    <script src="script/datahandler.js"></script>
+    <link rel="stylesheet" href="style/screen.css" />
+    <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>4 in a row</title>
+  </head>
+  <body>
+    <div class="titel py-5 dark:bg-gray-800 bg-gray-200">
+      <h1 class="text-4xl font-bold text-center dark:text-white">Nieuwe activiteit toevoegen</h1>
     </div>
-    <div>
-      <label for="isWater">Is het een waterspelletje?</label>
-      <select name="isWater" id="isWater">
-        <option value="ja">ja</option>
-        <option value="nee">nee</option>
-      </select>
+    <div class="w-full min-h-screen flex flex-wrap sm:flex-nowrap flex-row sm:flex-column dark:bg-gray-600">
+      <div class="navigatie w-full sm:w-96 m-5">
+        <div class="Buttons w-full">
+          <a href="index.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-nieuw">Home</button>
+          </a>
+          <a href="historiek.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-historiek">Historiek</button>
+          </a>
+        </div>
+      </div>
+      <div class="w-full m-5">
+        <form id="activiteitForm">
+          <div class="mb-5 grid grid-cols-2 gap-2">
+            <label class="w-full dark:text-white" for="activiteit">Activiteit</label>
+            <input class="w-full" type="text" name="activiteit" id="activiteit" />
+          </div>
+          <div class="mb-5 grid grid-cols-2 gap-2">
+            <label class="w-full dark:text-white" for="isWater">Is het een waterspelletje?</label>
+            <select name="isWater" id="isWater">
+              <option value="1">ja</option>
+              <option value="0">nee</option>
+            </select>
+          </div>
+          <div class="mb-5 grid grid-cols-2 gap-2">
+            <label class="w-full dark:text-white" for="aantalMinuten">Hoelang duurt dit spel?</label>
+            <select name="aantalMinuten" id="aantalMinuten">
+              <option value="1">1 minuut</option>
+              <option value="3">3 minuten</option>
+              <option value="5">5 minuten</option>
+              <option value="null">Geen bepaalde duur</option>
+            </select>
+          </div>
+          <div>
+            <button onclick="nieuweActiviteit()" type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Nieuwe activiteit toevoegen</button>
+          </div>
+          <div class="succes"></div>
+          <div class="error"></div>
+        </form>
+      </div>
     </div>
-    <div>
-      <label for="aantalMinuten">Hoelang duurt dit spel?</label>
-      <select name="aantalMinuten" id="aantalMinuten">
-        <option value="1">1 minuut</option>
-        <option value="3">3 minuten</option>
-        <option value="5">5 minuten</option>
-        <option value="/">Geen bepaalde duur</option>
-      </select>
-    </div>
-    <div>
-      <button onclick="nieuweActiviteit()" type="button">Nieuwe activiteit toevoegen</button>
-    </div>
-  </form>
-</body>
+  </body>
 </html>
