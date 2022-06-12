@@ -4,7 +4,7 @@ console.log(lanIP);
 const socket = io(`http://${lanIP}`);
 
 //#region ***  DOM references                           ***********
-let htmlHistoriek, htmlIndex, htmlOpdracht;
+let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner;
 //#endregion
 let kleur = '';
 let huidige_opdracht_geel = '';
@@ -131,6 +131,10 @@ const listenToSocket = function () {
   socket.on('B2F_ongedaan_maken', function () {
     verwijderPiece();
   });
+
+  socket.on('B2F_beginner', function (kleuren) {
+    document.querySelector('.beginnerShowen').innerHTML = kleuren;
+  });
 };
 //#endregion
 
@@ -199,6 +203,7 @@ function verwijderPiece() {
     laatstGezetteTile.classList.remove('yellow-piece');
     r += 1; //update the row height for that column start bij het laagste
     currColumns[c] = r; //update the array
+    socket.emit('F2B_geslaagd_true');
   }
 }
 
@@ -323,12 +328,16 @@ function openOpdracht() {
 
 function openWinner() {
   document.getElementById('mywinner').style.display = 'block';
+  newGame();
 }
 
 function closeWinner() {
   document.getElementById('mywinner').style.display = 'none';
 }
 
+const beginner = function () {
+  socket.emit('F2B_beginner');
+};
 //#region ***  Init / DOMContentLoaded                  ***********
 document.addEventListener('DOMContentLoaded', function () {
   console.info('DOM geladen');
@@ -336,6 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
   htmlHistoriek = document.querySelector('.historiek');
   htmlIndex = document.querySelector('.html-index');
   htmlOpdracht = document.querySelector('.js-opdracht');
+  htmlBeginner = document.querySelector('.html-beginner');
 
   // listenToUI();
   if (htmlIndex) {
@@ -349,6 +359,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (htmlHistoriek) {
     getHistoriek();
+  }
+
+  if (htmlBeginner) {
+    beginner();
   }
 });
 //#endregion

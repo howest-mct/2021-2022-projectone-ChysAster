@@ -24,28 +24,31 @@
           <a href="historiek.html">
             <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-historiek">Historiek</button>
           </a>
+          <a onclick="beginner()" href="beginner.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">Beginner</button>
+          </a>
         </div>
       </div>
       <div class="w-full m-5">
         <form id="activiteitForm">
           <div class="mb-5 grid grid-cols-2 gap-2">
             <label class="w-full dark:text-white" for="activiteit">Activiteit</label>
-            <input class="w-full" type="text" name="activiteit" id="activiteit" />
+            <input class="w-full bg-gray-400 text-white dark:text-black dark:bg-white" type="text" name="activiteit" id="activiteit" placeholder="Vul hier uw activiteit in" />
           </div>
           <div class="mb-5 grid grid-cols-2 gap-2">
             <label class="w-full dark:text-white" for="isWater">Is het een waterspelletje?</label>
-            <select name="isWater" id="isWater">
+            <select class="bg-gray-400 text-white dark:text-black dark:bg-white" name="isWater" id="isWater">
               <option value="1">ja</option>
               <option value="0">nee</option>
             </select>
           </div>
           <div class="mb-5 grid grid-cols-2 gap-2">
             <label class="w-full dark:text-white" for="aantalMinuten">Hoelang duurt dit spel?</label>
-            <select name="aantalMinuten" id="aantalMinuten">
+            <select class="bg-gray-400 text-white dark:text-black dark:bg-white" name="aantalMinuten" id="aantalMinuten">
               <option value="1">1 minuut</option>
               <option value="3">3 minuten</option>
               <option value="5">5 minuten</option>
-              <option value="null">Geen bepaalde duur</option>
+              <option value="0">Geen bepaalde duur</option>
             </select>
           </div>
           <div>

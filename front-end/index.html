@@ -33,6 +33,10 @@
           <a onclick="verwijderPiece()">
             <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">ONGEDAAN MAKEN</button>
           </a>
+          </a>
+          <a onclick="beginner()" href="beginner.html">
+            <button class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">BEGINNER</button>
+          </a>
         </div>
       </div>
       <div class="spel w-full m-5">
@@ -40,25 +44,25 @@
       </div>
       <div class="gegevens w-full sm:w-96 m-5">
         <h2 class="text-xl text-center dark:text-white">Temperatuur</h2>
-        <div class="js-temperatuur text-center dark:text-white">00.00 ° C</div>
+        <div class="js-temperatuur text-center dark:text-white"></div>
       </div>
     </div>
 
-    <div id="mywinner" class="winner">
-      <div id="winner"></div>
-      <h4>Verwijder de schijven uit de vier op een rij.</h4>
-      <button type="button" class="c-btn-opdracht" onclick="closeWinner()">Nieuw spel</button>
+    <div id="mywinner" class="drop-shadow-xl p-5 winner bg-gray-200 max-h-min absolute inset-y-1/4 inset-x-1/4 rounded">
+      <div class="mb-5 text-center text-2xl" id="winner"></div>
+      <h4 class="pb-5 text-center text-xl">Verwijder de schijven uit de vier op een rij.</h4>
+      <a href=""><button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="closeWinner()">Nieuw spel</button></a>
     </div>
 
-    <div class="opdracht-popup" id="myopdracht">
-      <h1 class="js-opdracht"></h1>
+    <div class="drop-shadow-xl p-5 bg-gray-200 max-h-min absolute inset-y-1/4 inset-x-1/4 rounded" id="myopdracht">
+      <h1 class="js-opdracht mb-20 text-center text-2xl"></h1>
       <div class="">
         <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="closeOpdracht()">Starten</button>
       </div>
     </div>
 
-    <div class="opdracht-popup" id="mygeslaagd">
-      <h1>Opdracht geslaagd?</h1>
+    <div class="drop-shadow-xl p-5 bg-gray-200 max-h-min absolute inset-y-1/4 inset-x-1/4 rounded" id="mygeslaagd">
+      <h1 class="mb-10 text-center text-2xl pt-10">Opdracht geslaagd?</h1>
       <div class="">
         <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="opdrachtGeslaagd(true)">Ja</button>
         <button type="button" class="my-1 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="opdrachtGeslaagd(false)">Nee</button>

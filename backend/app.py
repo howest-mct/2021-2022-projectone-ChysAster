@@ -12,6 +12,7 @@ from subprocess import check_output
 from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
+import random
 
 # get ip adres
 ips = check_output(['hostname', '--all-ip-addresses'])
@@ -31,7 +32,7 @@ opdrachtGestartGeel = False
 opdrachtGeslaagdGeel = False
 opdrachtGeslaagdBlauw = False
 
-
+kleuren = ["GEEL", "BLAUW"]
 kleur = ''
 
 # pin numbers of connected ir sensors
@@ -155,6 +156,20 @@ def opdracht_blauw_timer(minuten_blauw):
         start_thread_aftellen_drie_minuten2()
     elif(minuten_blauw == 5):
         start_thread_aftellen_vijf_minuten2()
+
+
+@socketio.on('F2B_geslaagd_true')
+def set_geslaagd_true():
+    global opdrachtGeslaagdGeel, opdrachtGeslaagdBlauw
+    opdrachtGeslaagdBlauw = True
+    opdrachtGeslaagdGeel = True
+    print("gedaan")
+
+
+@socketio.on('F2B_beginner')
+def beginner():
+    item = random.choice(kleuren)
+    socketio.emit('B2F_beginner', item)
 
 # function to get temp
 
@@ -374,6 +389,7 @@ def mag_schijf_spelen():
         return True
     else:
         return False
+
 
 # threads colums
 
@@ -1855,6 +1871,7 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
+
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':
