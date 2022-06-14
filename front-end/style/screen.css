@@ -57,8 +57,18 @@
   display: none;
 }
 
+#mywater{
+  display: none;
+}
+
+#mycold{
+  display: none;
+}
+
 .hidden {
   display: none;
 }
+
+
 
 

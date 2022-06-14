@@ -48,6 +48,8 @@ zevendeKolom = 6
 buzzer = 18
 buzzer2 = 17
 
+buzzerScan = 26
+
 buttonOngedaan = 27
 prev_status_button = GPIO.LOW
 # api endpoint
@@ -78,6 +80,7 @@ def setup_gpio():
     GPIO.add_event_detect(buttonOngedaan, GPIO.RISING, callback=button_pressed)
     GPIO.setup(buzzer, GPIO.OUT)
     GPIO.setup(buzzer2, GPIO.OUT)
+    GPIO.setup(buzzerScan, GPIO.OUT)
     spi.writebytes([0x9, 0])
     spi.writebytes([0xa, 0])
     spi.writebytes([0xb, 7])
@@ -176,7 +179,7 @@ def beginner():
 
 def temperatuur():
     sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
-
+    global t, lijn, temp
     sensor_file = open(sensor_file_name, 'r')
     for line in sensor_file:
         lijn = line.rstrip("\n")
@@ -207,6 +210,10 @@ def data_versturen():
         print("temperatuur versturen")
         socketio.emit('B2F_status_temp', {
                       'temperatuur': temperatuur()}, broadcast=True)
+        if temperatuur() >= 24:
+            socketio.emit('B2F_show_water_icoon')
+        else:
+            socketio.emit('B2F_close_water_icoon')
         DataRepository.create_historiek(2, temperatuur())
         time.sleep(15)
 
@@ -229,6 +236,9 @@ def read_serial():
                 line = port.readline().decode('utf-8')  .rstrip()
                 print(line)
                 if line == str(badgeGeel):
+                    GPIO.output(buzzerScan, GPIO.HIGH)
+                    time.sleep(0.15)
+                    GPIO.output(buzzerScan, GPIO.LOW)
                     mylcd.clear_lcd()
                     mylcd.write_message(zonderB)
                     mylcd.second_line()
@@ -247,6 +257,9 @@ def read_serial():
                     else:
                         socketio.emit('B2F_geslaagd_geel')
                 elif line == str(badgeBlauw):
+                    GPIO.output(buzzerScan, GPIO.HIGH)
+                    time.sleep(0.15)
+                    GPIO.output(buzzerScan, GPIO.LOW)
                     mylcd.clear_lcd()
                     mylcd.write_message(zonderB)
                     mylcd.second_line()
@@ -1871,7 +1884,6 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
-
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':

@@ -7,7 +7,9 @@
     <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png" />
     <title>4 in a row</title>
     <link rel="stylesheet" href="style/screen.css" />
+
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
     <script src="script/app.js"></script>
     <script src="script/datahandler.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,6 +35,7 @@
       </div>
       <div class="w-full sm:m-5">
         <div class="historiek dark:text-white"></div>
+        <canvas id="myChart" width="400" height="400"></canvas>
       </div>
     </div>
   </body>
