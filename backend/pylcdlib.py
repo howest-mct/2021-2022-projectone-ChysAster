@@ -43,7 +43,7 @@ Rs = 0b00000001  # Register select bit
 class lcd4bit:
     # initializes objects and lcd
     def __init__(self):
-        self.lcd_device = i2c_device(0x38)  # via i2cdetect
+        self.lcd_device = i2c_device(0x39)  # via i2cdetect
         self.send_instruction(0x03)
         self.send_instruction(0x03)
         self.send_instruction(0x03)
@@ -95,4 +95,5 @@ class lcd4bit:
 
 mylcd = lcd4bit()
 mylcd.write_message("test")
-mylcd.first_line()
+mylcd.second_line()
+mylcd.write_message(" kut")
