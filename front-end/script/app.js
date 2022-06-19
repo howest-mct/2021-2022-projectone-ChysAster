@@ -3,8 +3,10 @@ const lanIP = `${window.location.hostname}:5000`;
 console.log(lanIP);
 const socket = io(`http://${lanIP}`);
 
+let htmlStringBlauw = '';
+let htmlStringGeel = '';
 //#region ***  DOM references                           ***********
-let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner;
+let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner, htmlOpdrachtBlauw, htmlOpdrachtGeel, htmlGespeeldBlauw, htmlGespeeldGeel;
 //#endregion
 let kleur = '';
 let huidige_opdracht_geel = '';
@@ -15,6 +17,9 @@ let counterBlauw = 0;
 let counterGeel = 0;
 let idGeel = 0;
 let idBlauw = 0;
+
+let grafiekData = [];
+let grafiekLabel = [];
 
 //#region ***  4 in a row references                           ***********
 let r;
@@ -28,19 +33,15 @@ const showHistoriek = function (jsonObject) {
   console.log(jsonObject);
   let htmlString = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>
-        <th class="bg-gray-200 dark:bg-gray-800">id</th>
-        <th class="bg-gray-200 dark:bg-gray-800">Device</th>
+        <th class="bg-gray-200 dark:bg-gray-800">Team</th>
         <th class="bg-gray-200 dark:bg-gray-800">Tijdstip</th>
-        <th class="bg-gray-200 dark:bg-gray-800">Waarde</th>
       </tr>`;
-
   for (const historiek of jsonObject.historiek) {
+    let team = historiek.waarde.toUpperCase();
     htmlString += `
           <tr>
-            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.idHistoriek}</td>
-            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.naam}</td>
+            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${team}</td>
             <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.tijdstip}</td>
-            <td class="border border-slate-100 dark:border-slate-900 p-2 text-center">${historiek.waarde}</td>
           </tr>
         `;
   }
@@ -48,11 +49,83 @@ const showHistoriek = function (jsonObject) {
 
   htmlHistoriek.innerHTML = htmlString;
 };
+const showAantalGeel = function (jsonObject) {
+  console.log(jsonObject);
+  for (const aantal of jsonObject.aantal) {
+    console.log(aantal.aantal);
+    htmlStringGeel = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
+      <tr>
+        <th class="bg-gray-200 dark:bg-gray-800 dark:text-white">Gespeelde spelletjes geel. Aantal: ${aantal.aantal}</th>
+      </tr>`;
+  }
+};
+
+const showGeel = function (jsonObject) {
+  console.log(jsonObject);
+  for (const spel of jsonObject.spelletjes) {
+    htmlStringGeel += `
+          <tr>
+            <td class="border dark:text-white border-slate-100 dark:border-slate-900 p-2 text-center">${spel.Activiteit}</td>
+          </tr>
+        `;
+  }
+  htmlStringGeel += `</table>`;
+
+  htmlGespeeldGeel.innerHTML = htmlStringGeel;
+};
+
+const showAantalBlauw = function (jsonObject) {
+  console.log(jsonObject);
+  for (const aantal of jsonObject.aantal) {
+    console.log(aantal.aantal);
+    htmlStringBlauw = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
+      <tr>
+        <th class="bg-gray-200 dark:bg-gray-800 dark:text-white">Gespeelde spelletjes blauw. Aantal: ${aantal.aantal}</th>
+      </tr>`;
+  }
+};
+
+const showBlauw = function (jsonObject) {
+  console.log(jsonObject);
+
+  for (const spel of jsonObject.spelletjes) {
+    htmlStringBlauw += `
+          <tr>
+            <td class="border border-slate-100 dark:text-white dark:border-slate-900 p-2 text-center">${spel.Activiteit}</td>
+          </tr>
+        `;
+  }
+  htmlStringBlauw += `</table>`;
+
+  htmlGespeeldBlauw.innerHTML = htmlStringBlauw;
+};
+
+const showSpelletjes = function (jsonObject) {};
 //#endregion
 
 //#region ***  Data Access - get___                     ***********
 const getHistoriek = function () {
-  handleData(`http://${lanIP}/api/v1/historiek/`, showHistoriek);
+  handleData(`http://${lanIP}/api/v1/historiek/badges/`, showHistoriek);
+};
+
+const getGespeeldGeel = function () {
+  handleData(`http://${lanIP}/api/v1/gespeeld/geel/`, showGeel);
+};
+
+const getGespeeldBlauw = function () {
+  handleData(`http://${lanIP}/api/v1/gespeeld/blauw/`, showBlauw);
+};
+
+const getSpelletejs = function () {
+  handleData(`http://${lanIP}/api/v1/spelletjes/${kleur}/`, showSpelletjes);
+};
+
+const getAantalBlauw = function () {
+  handleData(`http://${lanIP}/api/v1/aantal/blauw/`, showAantalBlauw);
+};
+
+const getAantalGeel = function () {
+  handleData(`http://${lanIP}/api/v1/aantal/geel/`, showAantalGeel);
 };
 
 //#endregion
@@ -87,6 +160,18 @@ const listenToSocketTemp = function () {
     console.log(jsonObject);
     document.querySelector('.js-temperatuur').innerHTML = `${jsonObject.temperatuur} &deg; C`;
   });
+
+  socket.on('B2F_show_water_icoon', function () {
+    console.log('open water ');
+    closeCold();
+    openWater();
+  });
+
+  socket.on('B2F_close_water_icoon', function () {
+    console.log('sluit water');
+    closeWater();
+    openCold();
+  });
 };
 
 const listenToSocket = function () {
@@ -99,8 +184,11 @@ const listenToSocket = function () {
     console.log(huidige_opdracht_geel);
     aantal_minuten_geel = jsonObject.aantalMinuten;
     idGeel = jsonObject.idActiviteiten;
+    let hmtlString2 = huidige_opdracht_geel;
     let htmlString = huidige_opdracht_geel;
     htmlOpdracht.innerHTML = htmlString;
+    htmlOpdrachtGeel.innerHTML = hmtlString2;
+    openGeel();
     openOpdracht();
     socket.emit('F2B_opdracht_geel_is_gespeeld', idGeel);
   });
@@ -110,8 +198,11 @@ const listenToSocket = function () {
     console.log(huidige_opdracht_blauw);
     aantal_minuten_blauw = jsonObject.aantalMinuten;
     idBlauw = jsonObject.idActiviteiten;
+    let htmlString2 = huidige_opdracht_blauw;
     let htmlString = huidige_opdracht_blauw;
+    htmlOpdrachtBlauw.innerHTML = htmlString2;
     htmlOpdracht.innerHTML = htmlString;
+    openBlauw();
     openOpdracht();
     socket.emit('F2B_opdracht_blauw_is_gespeeld', idBlauw);
   });
@@ -308,6 +399,15 @@ function setWinner(r, c) {
 }
 
 //#endregion
+
+function openGeel() {
+  document.getElementById('opdracht-geel').style.display = 'block';
+}
+
+function openBlauw() {
+  document.getElementById('opdracht-blauw').style.display = 'block';
+}
+
 function closeGeslaagd() {
   document.getElementById('mygeslaagd').style.display = 'none';
 }
@@ -320,6 +420,8 @@ function closeOpdracht() {
   document.getElementById('myopdracht').style.display = 'none';
   socket.emit('F2B_opdracht_geel_minuten', aantal_minuten_geel);
   socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten_blauw);
+  aantal_minuten_blauw = 0;
+  aantal_minuten_geel = 0;
 }
 
 function openOpdracht() {
@@ -335,17 +437,115 @@ function closeWinner() {
   document.getElementById('mywinner').style.display = 'none';
 }
 
+function openWater() {
+  document.getElementById('mywater').style.display = 'grid';
+}
+
+function closeWater() {
+  document.getElementById('mywater').style.display = 'none';
+}
+
+function openCold() {
+  document.getElementById('mycold').style.display = 'grid';
+}
+
+function closeCold() {
+  document.getElementById('mycold').style.display = 'none';
+}
+
+function openBadges() {
+  closeGespeelde();
+  closeTemp();
+  document.getElementById('myhistoriek').style.display = 'block';
+}
+
+function closeBadges() {
+  document.getElementById('myhistoriek').style.display = 'none';
+}
+function openTemp() {
+  closeGespeelde();
+  closeBadges();
+  document.getElementById('mygrafiek').style.display = 'block';
+}
+
+function closeTemp() {
+  document.getElementById('mygrafiek').style.display = 'none';
+}
+
+function openGespeelde() {
+  closeTemp();
+  closeBadges();
+  document.getElementById('mygespeelde').style.display = 'block';
+}
+
+function closeGespeelde() {
+  document.getElementById('mygespeelde').style.display = 'none';
+}
+
+function openGeelGespeeld() {
+  document.getElementById('gespeeldgeel').style.display = 'grid';
+}
+
+function openBlauwGespeeld() {
+  document.getElementById('gespeeldblauw').style.display = 'grid';
+}
+
 const beginner = function () {
   socket.emit('F2B_beginner');
 };
+
 //#region ***  Init / DOMContentLoaded                  ***********
 document.addEventListener('DOMContentLoaded', function () {
   console.info('DOM geladen');
 
+  const getGrafiek = function () {
+    handleData(`http://${lanIP}/api/v1/grafiek/`, showGrafiek);
+  };
+
+  const showGrafiek = function (jsonObject) {
+    for (const temp of jsonObject.temp) {
+      grafiekData.push(parseFloat(temp.waarde));
+      grafiekLabel.push(temp.tijdstip);
+    }
+    console.log(grafiekData);
+    console.log(grafiekLabel);
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: grafiekLabel,
+        datasets: [
+          {
+            label: 'Temperatuur in graden Celcius',
+            data: grafiekData,
+            backgroundColor: ['rgba(255, 99, 132, 0.2)'],
+            borderColor: ['rgba(255, 99, 132, 1)'],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  };
+
+  //#region ***  Grafiek content                 ***********
+
+  //#endregion
+
   htmlHistoriek = document.querySelector('.historiek');
   htmlIndex = document.querySelector('.html-index');
   htmlOpdracht = document.querySelector('.js-opdracht');
+  htmlOpdrachtGeel = document.querySelector('.js-opdracht-geel');
+  htmlOpdrachtBlauw = document.querySelector('.js-opdracht-blauw');
   htmlBeginner = document.querySelector('.html-beginner');
+  htmlGespeeldGeel = document.querySelector('.gespeeldgeel');
+  htmlGespeeldBlauw = document.querySelector('.gespeeldblauw');
 
   // listenToUI();
   if (htmlIndex) {
@@ -359,6 +559,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (htmlHistoriek) {
     getHistoriek();
+    getGrafiek();
+    getGespeeldBlauw();
+    getGespeeldGeel();
+    getAantalBlauw();
+    getAantalGeel();
   }
 
   if (htmlBeginner) {

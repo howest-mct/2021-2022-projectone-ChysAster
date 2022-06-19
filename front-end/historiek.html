@@ -7,7 +7,9 @@
     <link rel="icon" type="image/png" sizes="8x8" href="/images/favicon.png" />
     <title>4 in a row</title>
     <link rel="stylesheet" href="style/screen.css" />
+
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
     <script src="script/app.js"></script>
     <script src="script/datahandler.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +34,33 @@
         </div>
       </div>
       <div class="w-full sm:m-5">
-        <div class="historiek dark:text-white"></div>
+        <div class="">
+          <a onclick="openTemp()">
+            <button class="my-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-historiek">Temperatuur</button>
+          </a>
+          <a onclick="openBadges()">
+            <button class="my-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">Teams</button>
+          </a>
+          <a onclick="openGespeelde()">
+            <button class="my-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">Gespeelde spelletjes</button>
+          </a>
+        </div>
+        <div id="myhistoriek" class="historiek dark:text-white"></div>
+        <div id="mygrafiek"><canvas id="myChart" width="400" height="400"></canvas></div>
+        <div id="mygespeelde" class="gespeeldeSpelletjes">
+          <div>
+            <a onclick="openGeelGespeeld()">
+              <button class="my-1 bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">Team geel</button>
+            </a>
+            <a onclick="openBlauwGespeeld()">
+              <button class="my-1 bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded js-button-ongedaan-maken">Team blauw</button>
+            </a>
+            <div>
+              <div id="gespeeldgeel" class="gespeeldgeel"></div>
+              <div id="gespeeldblauw" class="gespeeldblauw"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>

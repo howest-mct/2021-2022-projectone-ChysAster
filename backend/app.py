@@ -12,7 +12,9 @@ from subprocess import check_output
 from selenium import webdriver
 from pylcdlib import lcd4bit
 from serial import Serial, PARITY_NONE
+import sys
 import random
+import multiprocessing
 
 # get ip adres
 ips = check_output(['hostname', '--all-ip-addresses'])
@@ -22,7 +24,6 @@ mylcd = lcd4bit()
 mylcd.write_message(zonderB)
 mylcd.second_line()
 mylcd.write_message("Scan your badge")
-
 
 # set your batch numbers
 badgeGeel = 188
@@ -47,6 +48,8 @@ zevendeKolom = 6
 # pin numbers of buzzer
 buzzer = 18
 buzzer2 = 17
+
+buzzerScan = 26
 
 buttonOngedaan = 27
 prev_status_button = GPIO.LOW
@@ -78,6 +81,7 @@ def setup_gpio():
     GPIO.add_event_detect(buttonOngedaan, GPIO.RISING, callback=button_pressed)
     GPIO.setup(buzzer, GPIO.OUT)
     GPIO.setup(buzzer2, GPIO.OUT)
+    GPIO.setup(buzzerScan, GPIO.OUT)
     spi.writebytes([0x9, 0])
     spi.writebytes([0xa, 0])
     spi.writebytes([0xb, 7])
@@ -127,8 +131,51 @@ def get_historiek():
         return jsonify(historiek=DataRepository.get_historiek()), 200
 
 
+@app.route(endpoint + '/historiek/badges/', methods=['GET'])
+def get_badges():
+    if request.method == 'GET':
+        return jsonify(historiek=DataRepository.get_teams()), 200
+
+
+@app.route(endpoint + '/grafiek/', methods=['GET'])
+def get_temp_grafiek():
+    if request.method == 'GET':
+        return jsonify(temp=DataRepository.get_temp_grafiek()), 200
+
+
+@app.route(endpoint + '/spelletjes/<kleur>/', methods=["GET"])
+def get_gespeeld(kleur):
+    if request.method == 'GET':
+        return jsonify(spelletejes=DataRepository.get_gespeeld(kleur)), 200
+
+
+@app.route(endpoint + '/gespeeld/geel/', methods=["GET"])
+def get_gespeeld_geel():
+    if request.method == "GET":
+        return jsonify(spelletjes=DataRepository.get_gespeeld_geel()), 200
+
+
+@app.route(endpoint + '/gespeeld/blauw/', methods=["GET"])
+def get_gespeeld_blauw():
+    if request.method == "GET":
+        return jsonify(spelletjes=DataRepository.get_gespeeld_blauw()), 200
+
+
+@app.route(endpoint + '/aantal/blauw/', methods=["GET"])
+def get_aantal_blauw():
+    if request.method == "GET":
+        return jsonify(aantal=DataRepository.get_aantal_blauw()), 200
+
+
+@app.route(endpoint + '/aantal/geel/', methods=["GET"])
+def get_aantal_geel():
+    if request.method == "GET":
+        return jsonify(aantal=DataRepository.get_aantal_geel()), 200
+
 # @socketio.on()
 # first connection socket
+
+
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
@@ -138,24 +185,38 @@ def initial_connection():
 
 @socketio.on('F2B_opdracht_geel_minuten')
 def opdracht_geel_timer(minuten_geel):
+    global voorwaarde
     if(minuten_geel == 1):
-        start_thread_aftellen_een_minuten()
+        voorwaarde = True
+        print("starten een minuut geel")
+        start_thread_aftellen_een_minuten(voorwaarde)
     elif(minuten_geel == 3):
-        start_thread_aftellen_drie_minuten()
+        voorwaarde = True
+        print("starten drie minuut geel")
+        start_thread_aftellen_drie_minuten(voorwaarde)
     elif(minuten_geel == 5):
-        start_thread_aftellen_vijf_minuten()
+        voorwaarde = True
+        print("starten vijf minuut geel")
+        start_thread_aftellen_vijf_minuten(voorwaarde)
 
 # socket to start timer blue
 
 
 @socketio.on('F2B_opdracht_blauw_minuten')
 def opdracht_blauw_timer(minuten_blauw):
+    global voorwaarde_blauw
     if(minuten_blauw == 1):
-        start_thread_aftellen_een_minuten2()
+        voorwaarde_blauw = True
+        print("starten een minuut blauw")
+        start_thread_aftellen_een_minuten2(voorwaarde_blauw)
     elif(minuten_blauw == 3):
-        start_thread_aftellen_drie_minuten2()
+        voorwaarde_blauw = True
+        print("starten drie minuut blauw")
+        start_thread_aftellen_drie_minuten2(voorwaarde_blauw)
     elif(minuten_blauw == 5):
-        start_thread_aftellen_vijf_minuten2()
+        voorwaarde_blauw = True
+        print("starten vijf minuut blauw")
+        start_thread_aftellen_vijf_minuten2(voorwaarde_blauw)
 
 
 @socketio.on('F2B_geslaagd_true')
@@ -176,7 +237,7 @@ def beginner():
 
 def temperatuur():
     sensor_file_name = '/sys/bus/w1/devices/28-00000003b2c6/w1_slave'
-
+    global t, lijn, temp
     sensor_file = open(sensor_file_name, 'r')
     for line in sensor_file:
         lijn = line.rstrip("\n")
@@ -207,6 +268,10 @@ def data_versturen():
         print("temperatuur versturen")
         socketio.emit('B2F_status_temp', {
                       'temperatuur': temperatuur()}, broadcast=True)
+        if temperatuur() >= 24:
+            socketio.emit('B2F_show_water_icoon')
+        else:
+            socketio.emit('B2F_close_water_icoon')
         DataRepository.create_historiek(2, temperatuur())
         time.sleep(15)
 
@@ -225,15 +290,20 @@ def read_serial():
     global opdrachtGestartBlauw, opdrachtGestartGeel
     with Serial('/dev/ttyS0', 9600, bytesize=8, parity=PARITY_NONE, stopbits=1) as port:
         while True:
+            global voorwaardee
             if port.in_waiting > 0:
                 line = port.readline().decode('utf-8')  .rstrip()
                 print(line)
                 if line == str(badgeGeel):
+                    GPIO.output(buzzerScan, GPIO.HIGH)
+                    time.sleep(0.15)
+                    GPIO.output(buzzerScan, GPIO.LOW)
                     mylcd.clear_lcd()
                     mylcd.write_message(zonderB)
                     mylcd.second_line()
                     mylcd.write_message("Team geel")
                     DataRepository.create_historiek(1, "geel")
+
                     # socketio.emit('B2F_rfid_data_geel', "geel", broadcast=True)
                     kleur = 'geel'
                     if opdrachtGestartGeel == False:
@@ -246,7 +316,14 @@ def read_serial():
                                       activiteit_geel, broadcast=True)
                     else:
                         socketio.emit('B2F_geslaagd_geel')
+                        voorwaardee = False
+                        start_thread_aftellen_een_minuten(voorwaardee)
+                        start_thread_aftellen_drie_minuten(voorwaardee)
+                        start_thread_aftellen_vijf_minuten(voorwaardee)
                 elif line == str(badgeBlauw):
+                    GPIO.output(buzzerScan, GPIO.HIGH)
+                    time.sleep(0.15)
+                    GPIO.output(buzzerScan, GPIO.LOW)
                     mylcd.clear_lcd()
                     mylcd.write_message(zonderB)
                     mylcd.second_line()
@@ -264,6 +341,10 @@ def read_serial():
                                       activiteit_blauw, broadcast=True)
                     else:
                         socketio.emit('B2F_geslaagd_blauw')
+                        voorwaardee = False
+                        start_thread_aftellen_een_minuten2(voorwaardee)
+                        start_thread_aftellen_drie_minuten2(voorwaardee)
+                        start_thread_aftellen_vijf_minuten2(voorwaardee)
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
 # thread for serial
@@ -329,58 +410,114 @@ def button_pressed(channel):
 
 
 # thread for timer game
+all_processes = []
+all_processes_blauw = []
 
 
-def start_thread_aftellen_een_minuten():
+def start_thread_aftellen_een_minuten(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_een_minuten, args=(), daemon=True)
-    thread.start()
+    process_een = multiprocessing.Process(
+        target=aftellen_een_minuten)
+    if voorwaarde == True:
+        process_een.start()
+        all_processes.append(process_een)
+    else:
+        for process_een in all_processes:
+            print(process_een)
+            process_een.terminate()
+        all_processes.clear()
+        print(all_processes)
+        clear_memory()
+        voorwaarde = False
+
 
 # thread for timer game
 
 
-def start_thread_aftellen_drie_minuten():
+def start_thread_aftellen_drie_minuten(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_drie_minuten, args=(), daemon=True)
-    thread.start()
+    process_drie = multiprocessing.Process(
+        target=aftellen_drie_minuten)
+    if voorwaarde == True:
+        process_drie.start()
+        all_processes.append(process_drie)
+    else:
+        for process_drie in all_processes:
+            print(process_drie)
+            process_drie.terminate()
+
+            print(process_drie)
+        all_processes.clear()
+        print(all_processes)
+        clear_memory()
 
 # thread for timer game
 
 
-def start_thread_aftellen_vijf_minuten():
+def start_thread_aftellen_vijf_minuten(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_vijf_minuten, args=(), daemon=True)
-    thread.start()
+    process_vijf = multiprocessing.Process(
+        target=aftellen_vijf_minuten)
+    if voorwaarde == True:
+        process_vijf.start()
+        all_processes.append(process_vijf)
+    else:
+        for process_vijf in all_processes:
+            print(process_vijf)
+            process_vijf.terminate()
+
+            print(process_vijf)
+        all_processes.clear()
+        print(all_processes)
+        clear_memory()
 
 # thread for timer game
 
 
-def start_thread_aftellen_een_minuten2():
+def start_thread_aftellen_een_minuten2(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_een_minuten2, args=(), daemon=True)
-    thread.start()
+    process_een2 = multiprocessing.Process(
+        target=aftellen_een_minuten2)
+    if voorwaarde == True:
+        process_een2.start()
+        all_processes_blauw.append(process_een2)
+    else:
+        for process_een2 in all_processes_blauw:
+            process_een2.terminate()
+        all_processes_blauw.clear()
+        clear_memory2()
 
 # thread for timer game
 
 
-def start_thread_aftellen_drie_minuten2():
+def start_thread_aftellen_drie_minuten2(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_drie_minuten2, args=(), daemon=True)
-    thread.start()
+    process_drie2 = multiprocessing.Process(
+        target=aftellen_drie_minuten2)
+    if voorwaarde == True:
+        process_drie2.start()
+        all_processes_blauw.append(process_drie2)
+    else:
+        for process_drie2 in all_processes_blauw:
+            process_drie2.terminate()
+        all_processes_blauw.clear()
+        clear_memory2()
 
 # thread for timer game
 
 
-def start_thread_aftellen_vijf_minuten2():
+def start_thread_aftellen_vijf_minuten2(voorwaarde):
     print("**** Starting THREAD ****")
-    thread = threading.Thread(
-        target=aftellen_vijf_minuten2, args=(), daemon=True)
-    thread.start()
+    process_vijf2 = multiprocessing.Process(
+        target=aftellen_vijf_minuten2)
+    if voorwaarde == True:
+        process_vijf2.start()
+        all_processes_blauw.append(process_vijf2)
+    else:
+        for process_vijf2 in all_processes_blauw:
+            process_vijf2.terminate()
+        all_processes_blauw.clear()
+        clear_memory2()
 
 
 def mag_schijf_spelen():
@@ -1606,122 +1743,122 @@ def timer2():
 
 
 def cijferEen():
-    spi.writebytes([0x1, 0b00001000])
-    spi.writebytes([0x2, 0b00011000])
-    spi.writebytes([0x3, 0b00001000])
-    spi.writebytes([0x4, 0b00001000])
-    spi.writebytes([0x5, 0b00001000])
-    spi.writebytes([0x6, 0b00001000])
-    spi.writebytes([0x7, 0b00001000])
-    spi.writebytes([0x8, 0b00011100])
+    spi.writebytes([0x1, 0b00000000])
+    spi.writebytes([0x2, 0b00000000])
+    spi.writebytes([0x3, 0b10000010])
+    spi.writebytes([0x4, 0b11111111])
+    spi.writebytes([0x5, 0b10000000])
+    spi.writebytes([0x6, 0b00000000])
+    spi.writebytes([0x7, 0b00000000])
+    spi.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferEen2():
-    spi2.writebytes([0x1, 0b00001000])
-    spi2.writebytes([0x2, 0b00011000])
-    spi2.writebytes([0x3, 0b00001000])
-    spi2.writebytes([0x4, 0b00001000])
-    spi2.writebytes([0x5, 0b00001000])
-    spi2.writebytes([0x6, 0b00001000])
-    spi2.writebytes([0x7, 0b00001000])
-    spi2.writebytes([0x8, 0b00011100])
+    spi2.writebytes([0x1, 0b00000000])
+    spi2.writebytes([0x2, 0b00000000])
+    spi2.writebytes([0x3, 0b10000010])
+    spi2.writebytes([0x4, 0b11111111])
+    spi2.writebytes([0x5, 0b10000000])
+    spi2.writebytes([0x6, 0b00000000])
+    spi2.writebytes([0x7, 0b00000000])
+    spi2.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferTwee():
     spi.writebytes([0x1, 0b00000000])
-    spi.writebytes([0x2, 0b00111000])
-    spi.writebytes([0x3, 0b01000100])
-    spi.writebytes([0x4, 0b00000100])
-    spi.writebytes([0x5, 0b00001000])
-    spi.writebytes([0x6, 0b00010000])
-    spi.writebytes([0x7, 0b00100000])
-    spi.writebytes([0x8, 0b01111100])
+    spi.writebytes([0x2, 0b10000100])
+    spi.writebytes([0x3, 0b11000010])
+    spi.writebytes([0x4, 0b10100010])
+    spi.writebytes([0x5, 0b10010010])
+    spi.writebytes([0x6, 0b10001100])
+    spi.writebytes([0x7, 0b00000000])
+    spi.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferTwee2():
     spi2.writebytes([0x1, 0b00000000])
-    spi2.writebytes([0x2, 0b00111000])
-    spi2.writebytes([0x3, 0b01000100])
-    spi2.writebytes([0x4, 0b00000100])
-    spi2.writebytes([0x5, 0b00001000])
-    spi2.writebytes([0x6, 0b00010000])
-    spi2.writebytes([0x7, 0b00100000])
-    spi2.writebytes([0x8, 0b01111100])
+    spi2.writebytes([0x2, 0b10000100])
+    spi2.writebytes([0x3, 0b11000010])
+    spi2.writebytes([0x4, 0b10100010])
+    spi2.writebytes([0x5, 0b10010010])
+    spi2.writebytes([0x6, 0b10001100])
+    spi2.writebytes([0x7, 0b00000000])
+    spi2.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferDrie():
     spi.writebytes([0x1, 0b00000000])
-    spi.writebytes([0x2, 0b00111000])
-    spi.writebytes([0x3, 0b01000100])
-    spi.writebytes([0x4, 0b00000100])
-    spi.writebytes([0x5, 0b00011000])
-    spi.writebytes([0x6, 0b00000100])
-    spi.writebytes([0x7, 0b01000100])
-    spi.writebytes([0x8, 0b00111000])
+    spi.writebytes([0x2, 0b01000100])
+    spi.writebytes([0x3, 0b10000010])
+    spi.writebytes([0x4, 0b10010010])
+    spi.writebytes([0x5, 0b10010010])
+    spi.writebytes([0x6, 0b01101100])
+    spi.writebytes([0x7, 0b00000000])
+    spi.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferDrie2():
     spi2.writebytes([0x1, 0b00000000])
-    spi2.writebytes([0x2, 0b00111000])
-    spi2.writebytes([0x3, 0b01000100])
-    spi2.writebytes([0x4, 0b00000100])
-    spi2.writebytes([0x5, 0b00011000])
-    spi2.writebytes([0x6, 0b00000100])
-    spi2.writebytes([0x7, 0b01000100])
-    spi2.writebytes([0x8, 0b00111000])
+    spi2.writebytes([0x2, 0b01000100])
+    spi2.writebytes([0x3, 0b10000010])
+    spi2.writebytes([0x4, 0b10010010])
+    spi2.writebytes([0x5, 0b10010010])
+    spi2.writebytes([0x6, 0b01101100])
+    spi2.writebytes([0x7, 0b00000000])
+    spi2.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferVier():
     spi.writebytes([0x1, 0b00000000])
-    spi.writebytes([0x2, 0b00000100])
-    spi.writebytes([0x3, 0b00001100])
-    spi.writebytes([0x4, 0b00010100])
+    spi.writebytes([0x2, 0b00100000])
+    spi.writebytes([0x3, 0b00110000])
+    spi.writebytes([0x4, 0b00101000])
     spi.writebytes([0x5, 0b00100100])
-    spi.writebytes([0x6, 0b01111110])
-    spi.writebytes([0x7, 0b00000100])
-    spi.writebytes([0x8, 0b00000100])
+    spi.writebytes([0x6, 0b11111110])
+    spi.writebytes([0x7, 0b00100000])
+    spi.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferVier2():
     spi2.writebytes([0x1, 0b00000000])
-    spi2.writebytes([0x2, 0b00000100])
-    spi2.writebytes([0x3, 0b00001100])
-    spi2.writebytes([0x4, 0b00010100])
+    spi2.writebytes([0x2, 0b00100000])
+    spi2.writebytes([0x3, 0b00110000])
+    spi2.writebytes([0x4, 0b00101000])
     spi2.writebytes([0x5, 0b00100100])
-    spi2.writebytes([0x6, 0b01111110])
-    spi2.writebytes([0x7, 0b00000100])
-    spi2.writebytes([0x8, 0b00000100])
+    spi2.writebytes([0x6, 0b11111110])
+    spi2.writebytes([0x7, 0b00100000])
+    spi2.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferVijf():
     spi.writebytes([0x1, 0b00000000])
-    spi.writebytes([0x2, 0b00111110])
-    spi.writebytes([0x3, 0b00100000])
-    spi.writebytes([0x4, 0b00111100])
-    spi.writebytes([0x5, 0b0000010])
-    spi.writebytes([0x6, 0b00000010])
-    spi.writebytes([0x7, 0b00100010])
-    spi.writebytes([0x8, 0b00011100])
+    spi.writebytes([0x2, 0b00000000])
+    spi.writebytes([0x3, 0b10001110])
+    spi.writebytes([0x4, 0b10001010])
+    spi.writebytes([0x5, 0b10001010])
+    spi.writebytes([0x6, 0b10011010])
+    spi.writebytes([0x7, 0b01100010])
+    spi.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
 def cijferVijf2():
     spi2.writebytes([0x1, 0b00000000])
-    spi2.writebytes([0x2, 0b00111110])
-    spi2.writebytes([0x3, 0b00100000])
-    spi2.writebytes([0x4, 0b00111100])
-    spi2.writebytes([0x5, 0b0000010])
-    spi2.writebytes([0x6, 0b00000010])
-    spi2.writebytes([0x7, 0b00100010])
-    spi2.writebytes([0x8, 0b00011100])
+    spi2.writebytes([0x2, 0b00000000])
+    spi2.writebytes([0x3, 0b10001110])
+    spi2.writebytes([0x4, 0b10001010])
+    spi2.writebytes([0x5, 0b10001010])
+    spi2.writebytes([0x6, 0b10011010])
+    spi2.writebytes([0x7, 0b01100010])
+    spi2.writebytes([0x8, 0b00000000])
     time.sleep(1)
 
 
@@ -1801,6 +1938,12 @@ def timeOut2():
     volledigAan2()
 
 
+def count_down(countdown_time):
+    start = time.time()
+    while((time.time() - start) < countdown_time):
+        pass
+
+
 def aftellen_vijf_minuten():
     cijferVijf()
     timer()
@@ -1871,7 +2014,6 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
-
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':
