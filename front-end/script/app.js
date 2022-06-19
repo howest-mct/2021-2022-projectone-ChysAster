@@ -420,6 +420,8 @@ function closeOpdracht() {
   document.getElementById('myopdracht').style.display = 'none';
   socket.emit('F2B_opdracht_geel_minuten', aantal_minuten_geel);
   socket.emit('F2B_opdracht_blauw_minuten', aantal_minuten_blauw);
+  aantal_minuten_blauw = 0;
+  aantal_minuten_geel = 0;
 }
 
 function openOpdracht() {

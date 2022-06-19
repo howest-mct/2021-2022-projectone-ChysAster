@@ -188,12 +188,15 @@ def opdracht_geel_timer(minuten_geel):
     global voorwaarde
     if(minuten_geel == 1):
         voorwaarde = True
+        print("starten een minuut geel")
         start_thread_aftellen_een_minuten(voorwaarde)
     elif(minuten_geel == 3):
         voorwaarde = True
+        print("starten drie minuut geel")
         start_thread_aftellen_drie_minuten(voorwaarde)
     elif(minuten_geel == 5):
         voorwaarde = True
+        print("starten vijf minuut geel")
         start_thread_aftellen_vijf_minuten(voorwaarde)
 
 # socket to start timer blue
@@ -201,16 +204,19 @@ def opdracht_geel_timer(minuten_geel):
 
 @socketio.on('F2B_opdracht_blauw_minuten')
 def opdracht_blauw_timer(minuten_blauw):
-    global voorwaarde
+    global voorwaarde_blauw
     if(minuten_blauw == 1):
-        voorwaarde = True
-        start_thread_aftellen_een_minuten2(voorwaarde)
+        voorwaarde_blauw = True
+        print("starten een minuut blauw")
+        start_thread_aftellen_een_minuten2(voorwaarde_blauw)
     elif(minuten_blauw == 3):
-        voorwaarde = True
-        start_thread_aftellen_drie_minuten2(voorwaarde)
+        voorwaarde_blauw = True
+        print("starten drie minuut blauw")
+        start_thread_aftellen_drie_minuten2(voorwaarde_blauw)
     elif(minuten_blauw == 5):
-        voorwaarde = True
-        start_thread_aftellen_vijf_minuten2(voorwaarde)
+        voorwaarde_blauw = True
+        print("starten vijf minuut blauw")
+        start_thread_aftellen_vijf_minuten2(voorwaarde_blauw)
 
 
 @socketio.on('F2B_geslaagd_true')
@@ -419,6 +425,8 @@ def start_thread_aftellen_een_minuten(voorwaarde):
         for process_een in all_processes:
             print(process_een)
             process_een.terminate()
+        all_processes.clear()
+        print(all_processes)
         clear_memory()
         voorwaarde = False
 
@@ -437,6 +445,10 @@ def start_thread_aftellen_drie_minuten(voorwaarde):
         for process_drie in all_processes:
             print(process_drie)
             process_drie.terminate()
+
+            print(process_drie)
+        all_processes.clear()
+        print(all_processes)
         clear_memory()
 
 # thread for timer game
@@ -453,6 +465,10 @@ def start_thread_aftellen_vijf_minuten(voorwaarde):
         for process_vijf in all_processes:
             print(process_vijf)
             process_vijf.terminate()
+
+            print(process_vijf)
+        all_processes.clear()
+        print(all_processes)
         clear_memory()
 
 # thread for timer game
@@ -468,6 +484,7 @@ def start_thread_aftellen_een_minuten2(voorwaarde):
     else:
         for process_een2 in all_processes_blauw:
             process_een2.terminate()
+        all_processes_blauw.clear()
         clear_memory2()
 
 # thread for timer game
@@ -483,6 +500,7 @@ def start_thread_aftellen_drie_minuten2(voorwaarde):
     else:
         for process_drie2 in all_processes_blauw:
             process_drie2.terminate()
+        all_processes_blauw.clear()
         clear_memory2()
 
 # thread for timer game
@@ -498,6 +516,7 @@ def start_thread_aftellen_vijf_minuten2(voorwaarde):
     else:
         for process_vijf2 in all_processes_blauw:
             process_vijf2.terminate()
+        all_processes_blauw.clear()
         clear_memory2()
 
 
