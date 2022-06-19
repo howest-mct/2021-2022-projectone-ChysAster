@@ -49,6 +49,10 @@
   display: none;
 }
 
+#myhistoriek{
+  display: none;
+}
+
 #mygeslaagd {
   display: none;
 }
@@ -65,7 +69,26 @@
   display: none;
 }
 
+#gespeeldblauw{
+  display: none;
+}
+
+#gespeeldgeel{
+  display: none;
+}
+
+#mygespeelde{
+  display: none;
+}
+
 .hidden {
+  display: none;
+}
+
+#opdracht-geel{
+  display: none;
+}
+#opdracht-blauw{
   display: none;
 }
 
