@@ -17,8 +17,8 @@ let counterBlauw = 0;
 let counterGeel = 0;
 let idGeel = 0;
 let idBlauw = 0;
-let aantalGespeeldBlauw = 0;
-let aantalGespeeldGeel = 0;
+var aantalGespeeldBlauw = 0;
+var aantalGespeeldGeel = 0;
 
 let grafiekData = [];
 let grafiekLabel = [];
