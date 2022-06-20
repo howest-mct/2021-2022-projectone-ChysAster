@@ -320,6 +320,7 @@ def read_serial():
                         start_thread_aftellen_een_minuten(voorwaardee)
                         start_thread_aftellen_drie_minuten(voorwaardee)
                         start_thread_aftellen_vijf_minuten(voorwaardee)
+                        timeOut()
                 elif line == str(badgeBlauw):
                     GPIO.output(buzzerScan, GPIO.HIGH)
                     time.sleep(0.15)
@@ -345,6 +346,7 @@ def read_serial():
                         start_thread_aftellen_een_minuten2(voorwaardee)
                         start_thread_aftellen_drie_minuten2(voorwaardee)
                         start_thread_aftellen_vijf_minuten2(voorwaardee)
+                        timeOut2()
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
 # thread for serial
@@ -1920,6 +1922,8 @@ def timeOut():
     clear_memory()
     time.sleep(0.5)
     volledigAan()
+    time.sleep(0.5)
+    clear_memory()
 
 
 def timeOut2():
@@ -1936,6 +1940,8 @@ def timeOut2():
     clear_memory2()
     time.sleep(0.5)
     volledigAan2()
+    time.sleep(0.5)
+    clear_memory2()
 
 
 def count_down(countdown_time):
