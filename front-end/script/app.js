@@ -17,6 +17,8 @@ let counterBlauw = 0;
 let counterGeel = 0;
 let idGeel = 0;
 let idBlauw = 0;
+let aantalGespeeldBlauw = 0;
+let aantalGespeeldGeel = 0;
 
 let grafiekData = [];
 let grafiekLabel = [];
@@ -54,7 +56,6 @@ const showAantalGeel = function (jsonObject) {
   for (const aantal of jsonObject.aantal) {
     console.log(aantal.aantal);
     aantalGespeeldGeel = aantal.aantal;
-    yellow(aantalGespeeldGeel);
     console.log(aantalGespeeldGeel);
     htmlStringGeel = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>
@@ -82,7 +83,6 @@ const showAantalBlauw = function (jsonObject) {
   for (const aantal of jsonObject.aantal) {
     console.log(aantal.aantal);
     aantalGespeeldBlauw = aantal.aantal;
-    blue(aantalGespeeldBlauw);
     console.log(aantalGespeeldBlauw);
     htmlStringBlauw = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>

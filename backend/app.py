@@ -26,8 +26,8 @@ mylcd.second_line()
 mylcd.write_message("Scan your badge")
 
 # set your batch numbers
-badgeGeel = 188
-badgeBlauw = 129
+badgeGeel = 188 #badge team yellow
+badgeBlauw = 129 #badge team blue
 opdrachtGestartBlauw = False
 opdrachtGestartGeel = False
 opdrachtGeslaagdGeel = False
@@ -37,13 +37,13 @@ kleuren = ["GEEL", "BLAUW"]
 kleur = ''
 
 # pin numbers of connected ir sensors
-eersteKolom = 21
-tweedeKolom = 22
-derdeKolom = 20
-vierdeKolom = 25
-vijfdeKolom = 19
-zesdeKolom = 13
-zevendeKolom = 6
+eersteKolom = 21  # first column
+tweedeKolom = 22  # second
+derdeKolom = 20  # third
+vierdeKolom = 25  # fourth
+vijfdeKolom = 19  # fith
+zesdeKolom = 13  # sixt
+zevendeKolom = 6  # seventh
 
 # pin numbers of buzzer
 buzzer = 18
@@ -2020,6 +2020,7 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
+
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':
