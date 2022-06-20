@@ -6,7 +6,7 @@ const socket = io(`http://${lanIP}`);
 let htmlStringBlauw = '';
 let htmlStringGeel = '';
 //#region ***  DOM references                           ***********
-let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner, htmlOpdrachtBlauw, htmlOpdrachtGeel, htmlGespeeldBlauw, htmlGespeeldGeel;
+let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner, htmlOpdrachtBlauw, htmlOpdrachtGeel, htmlGespeeldBlauw, htmlGespeeldGeel, htmlProcent;
 //#endregion
 let kleur = '';
 let huidige_opdracht_geel = '';
@@ -17,6 +17,8 @@ let counterBlauw = 0;
 let counterGeel = 0;
 let idGeel = 0;
 let idBlauw = 0;
+var aantalGespeeldBlauw = 0;
+var aantalGespeeldGeel = 0;
 
 let grafiekData = [];
 let grafiekLabel = [];
@@ -53,6 +55,8 @@ const showAantalGeel = function (jsonObject) {
   console.log(jsonObject);
   for (const aantal of jsonObject.aantal) {
     console.log(aantal.aantal);
+    aantalGespeeldGeel = aantal.aantal;
+    console.log(aantalGespeeldGeel);
     htmlStringGeel = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>
         <th class="bg-gray-200 dark:bg-gray-800 dark:text-white">Gespeelde spelletjes geel. Aantal: ${aantal.aantal}</th>
@@ -78,6 +82,8 @@ const showAantalBlauw = function (jsonObject) {
   console.log(jsonObject);
   for (const aantal of jsonObject.aantal) {
     console.log(aantal.aantal);
+    aantalGespeeldBlauw = aantal.aantal;
+    console.log(aantalGespeeldBlauw);
     htmlStringBlauw = `<table class="c-table w-full table-auto border-spacing-1 border dark:border-gray-900">
       <tr>
         <th class="bg-gray-200 dark:bg-gray-800 dark:text-white">Gespeelde spelletjes blauw. Aantal: ${aantal.aantal}</th>
@@ -96,7 +102,6 @@ const showBlauw = function (jsonObject) {
         `;
   }
   htmlStringBlauw += `</table>`;
-
   htmlGespeeldBlauw.innerHTML = htmlStringBlauw;
 };
 
@@ -546,6 +551,7 @@ document.addEventListener('DOMContentLoaded', function () {
   htmlBeginner = document.querySelector('.html-beginner');
   htmlGespeeldGeel = document.querySelector('.gespeeldgeel');
   htmlGespeeldBlauw = document.querySelector('.gespeeldblauw');
+  htmlProcent = document.querySelector('.procentueel');
 
   // listenToUI();
   if (htmlIndex) {

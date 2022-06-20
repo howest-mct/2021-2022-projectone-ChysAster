@@ -26,8 +26,8 @@ mylcd.second_line()
 mylcd.write_message("Scan your badge")
 
 # set your batch numbers
-badgeGeel = 188
-badgeBlauw = 129
+badgeGeel = 188 #badge team yellow
+badgeBlauw = 129 #badge team blue
 opdrachtGestartBlauw = False
 opdrachtGestartGeel = False
 opdrachtGeslaagdGeel = False
@@ -37,13 +37,13 @@ kleuren = ["GEEL", "BLAUW"]
 kleur = ''
 
 # pin numbers of connected ir sensors
-eersteKolom = 21
-tweedeKolom = 22
-derdeKolom = 20
-vierdeKolom = 25
-vijfdeKolom = 19
-zesdeKolom = 13
-zevendeKolom = 6
+eersteKolom = 21  # first column
+tweedeKolom = 22  # second
+derdeKolom = 20  # third
+vierdeKolom = 25  # fourth
+vijfdeKolom = 19  # fith
+zesdeKolom = 13  # sixt
+zevendeKolom = 6  # seventh
 
 # pin numbers of buzzer
 buzzer = 18
@@ -320,6 +320,7 @@ def read_serial():
                         start_thread_aftellen_een_minuten(voorwaardee)
                         start_thread_aftellen_drie_minuten(voorwaardee)
                         start_thread_aftellen_vijf_minuten(voorwaardee)
+                        timeOut()
                 elif line == str(badgeBlauw):
                     GPIO.output(buzzerScan, GPIO.HIGH)
                     time.sleep(0.15)
@@ -345,6 +346,7 @@ def read_serial():
                         start_thread_aftellen_een_minuten2(voorwaardee)
                         start_thread_aftellen_drie_minuten2(voorwaardee)
                         start_thread_aftellen_vijf_minuten2(voorwaardee)
+                        timeOut2()
                 socketio.emit('B2F_rfid_data', kleur, broadcast=True)
 
 # thread for serial
@@ -1920,6 +1922,8 @@ def timeOut():
     clear_memory()
     time.sleep(0.5)
     volledigAan()
+    time.sleep(0.5)
+    clear_memory()
 
 
 def timeOut2():
@@ -1936,6 +1940,8 @@ def timeOut2():
     clear_memory2()
     time.sleep(0.5)
     volledigAan2()
+    time.sleep(0.5)
+    clear_memory2()
 
 
 def count_down(countdown_time):
@@ -2014,6 +2020,7 @@ def aftellen_een_minuten2():
     buzzer_einde2()
     timeOut2()
     clear_memory2()
+
 
     # ANDERE FUNCTIES
 if __name__ == '__main__':
