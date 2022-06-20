@@ -6,7 +6,7 @@ const socket = io(`http://${lanIP}`);
 let htmlStringBlauw = '';
 let htmlStringGeel = '';
 //#region ***  DOM references                           ***********
-let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner, htmlOpdrachtBlauw, htmlOpdrachtGeel, htmlGespeeldBlauw, htmlGespeeldGeel, htmlProcent;
+let htmlHistoriek, htmlIndex, htmlOpdracht, htmlBeginner, htmlOpdrachtBlauw, htmlOpdrachtGeel, htmlGespeeldBlauw, htmlGespeeldGeel;
 //#endregion
 let kleur = '';
 let huidige_opdracht_geel = '';
@@ -551,7 +551,6 @@ document.addEventListener('DOMContentLoaded', function () {
   htmlBeginner = document.querySelector('.html-beginner');
   htmlGespeeldGeel = document.querySelector('.gespeeldgeel');
   htmlGespeeldBlauw = document.querySelector('.gespeeldblauw');
-  htmlProcent = document.querySelector('.procentueel');
 
   // listenToUI();
   if (htmlIndex) {
